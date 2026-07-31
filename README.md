@@ -1,0 +1,2 @@
+# AccuMate
+Accounting AI Tutor
