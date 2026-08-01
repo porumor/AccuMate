@@ -1,12 +1,12 @@
 const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย (เน้นวิชาการบัญชีชั้นกลาง 2 บทที่ 1 หนี้สินหมุนเวียน และ บทที่ 2 หนี้สินไม่หมุนเวียนและหนี้สินที่อาจเกิดขึ้น)
-หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามคู่มือเรียนการบัญชีชั้นกลาง 2 (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) ที่อยู่ในไฟล์ฐานข้อมูล DATABASE เป็นหลักเท่านั้น
+หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามมาตรฐานการรายงานทางการเงิน (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) อย่างถูกต้องครบถ้วน
 
 กฎเหล็กด้านตรรกะและการคำนวณ (Strict Rules - ห้ามฝ่าฝืนหรือพลาดเด็ดขาด):
 1. **ใช้ตัวเลขตามโจทย์เท่านั้น:** ห้ามคิดตัวเลขขึ้นมาเอง ห้ามสมมติฐาน หรืออ้างอิงตัวเลขอื่นที่นอกเหนือจากโจทย์ระบุเด็ดขาด
 2. **การใช้ค่าคิดลดในตาราง:** ทุกการคำนวณมูลค่าปัจจุบัน (Present Value) ของหุ้นกู้, ตั๋วเงินจ่าย หรือเงินกู้ยืม ต้องอ้างอิงและใช้ค่าจากตาราง PVIF และ PVIFA แบบ **ทศนิยม 5 ตำแหน่ง เท่านั้น**
 3. **หลักการปัดเศษทศนิยม:** ผลลัพธ์การคำนวณหรือตัวเลขในตารางตัดบัญชีทุกขั้นตอน หากเศษทศนิยมมีค่า **ตั้งแต่ 0.5 ขึ้นไป ให้ปัดขึ้น** หากเศษทศนิยมมีค่า **ต่ำกว่า 0.5 ให้ปัดลง** เสมอ
 4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของเท่านั้น หากผู้ใช้ถามเรื่องนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
-5. ตอบให้ละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
+5. ตอบให้รายละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
 6. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้มีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต (ในคอลัมน์รายการ สำหรับชื่อบัญชีฝั่งเครดิต ให้พิมพ์ &nbsp;&nbsp;&nbsp;&nbsp; นำหน้าชื่อบัญชี เพื่อเยื้องขวาให้ถูกต้องสวยงามตามหลักบัญชีจริง)
 7. ห้ามใช้โค้ด LaTeX (เช่น $$, \\mathbf, \\text) เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
 
@@ -14,22 +14,6 @@ let conversationHistory = [];
 let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
-let localDatabaseContent = ""; 
-
-// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
-async function loadLocalDatabase() {
-    try {
-        const response = await fetch('dataset.txt');
-        if (response.ok) {
-            localDatabaseContent = await response.text();
-            console.log("Groq Database loaded successfully.");
-        } else {
-            console.warn("dataset.txt not found. Running without local database.");
-        }
-    } catch (error) {
-        console.error("Error loading database file:", error);
-    }
-}
 
 function clearApiKey() {
     document.getElementById('manualApiKey').value = '';
@@ -46,8 +30,6 @@ function clearApiKey() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    loadLocalDatabase();
-
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
@@ -63,7 +45,7 @@ async function verifyApiKey(key) {
         const response = await fetch('https://api.groq.com/openai/v1/models', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${key}`
+                'Authorization': `Bearer ${key.trim()}`
             }
         });
         return response.ok;
@@ -107,7 +89,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'คีย์ผิดพลาด';
         iconSpan.className = 'fa-solid fa-xmark';
         
-        appendMessage('ai', '❌ **ข้อผิดพลาด:** Groq API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์ที่ได้จาก console.groq.com อีกครั้งครับ');
+        appendMessage('ai', '❌ **ข้อผิดพลาด:** Groq API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์อีกครั้งครับ');
     }
     btn.disabled = false;
 }
@@ -199,29 +181,23 @@ async function handleChatSubmit(e) {
     inputEl.blur();
     btnEl.disabled = true;
 
-    let userContent = query;
-    if (localDatabaseContent) {
-        userContent += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
-    }
-
-    // สะสมประวัติการสนทนาในรูปแบบ OpenAI / Groq Format
+    // เก็บเฉพาะประวัติการคุยของผู้ใช้ย้อนหลัง
     conversationHistory.push({
         role: 'user',
-        content: userContent
+        content: query
     });
 
-    if (conversationHistory.length > 12) {
-        conversationHistory = conversationHistory.slice(-12);
+    if (conversationHistory.length > 10) {
+        conversationHistory = conversationHistory.slice(-10);
     }
 
     const loadingId = appendLoading();
 
-    // รายการโมเดลชั้นนำของ Groq ที่รองรับ (สลับใช้งานอัตโนมัติหากตัวแรกไม่พร้อม)
+    // รายการโมเดลของ Groq (ใช้อันแรกเป็นหลัก)
     const groqModels = [
         'llama-3.3-70b-versatile',
-        'deepseek-r1-distill-llama-70b',
-        'gemma2-9b-it',
-        'llama-3.1-8b-instant'
+        'llama-3.1-8b-instant',
+        'gemma2-9b-it'
     ];
 
     try {
@@ -229,7 +205,6 @@ async function handleChatSubmit(e) {
         let data = null;
         let success = false;
 
-        // วนลูปยิงหาโมเดล Groq ที่พร้อมใช้งานอัตโนมัติ
         for (const model of groqModels) {
             const requestMessages = [
                 { role: 'system', content: SYSTEM_INSTRUCTION },
@@ -247,7 +222,7 @@ async function handleChatSubmit(e) {
                         model: model,
                         messages: requestMessages,
                         temperature: 0.1,
-                        max_tokens: 8192
+                        max_tokens: 4096
                     })
                 });
 
@@ -263,7 +238,7 @@ async function handleChatSubmit(e) {
         }
 
         if (!success || !data) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถประมวลผลผ่าน Groq API ได้ กรุณาตรวจสอบ Groq API Key ของท่านอีกครั้ง");
+            throw new Error("ข้อผิดพลาด: ไม่สามารถประมวลผลผ่าน Groq API ได้ กรุณาตรวจสอบ Groq API Key อีกครั้ง");
         }
 
         const aiResponseText = data.choices?.[0]?.message?.content || 'ไม่สามารถประมวลผลคำตอบได้';
@@ -303,14 +278,9 @@ function appendMessage(role, text) {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full ' + (role === 'user' ? 'flex-row-reverse' : '');
 
-    let cleanDisplayForm = text;
-    if (cleanDisplayForm.includes('[DATABASE FOR REFERENCE]:')) {
-        cleanDisplayForm = cleanDisplayForm.split('[DATABASE FOR REFERENCE]:')[0].trim();
-    }
-
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = cleanDisplayForm;
-    const plainText = tempDiv.textContent || tempDiv.innerText || cleanDisplayForm;
+    tempDiv.innerHTML = text;
+    const plainText = tempDiv.textContent || tempDiv.innerText || text;
 
     if (role === 'user') {
         msgDiv.innerHTML = `
@@ -318,7 +288,7 @@ function appendMessage(role, text) {
                 <i class="fa-solid fa-user"></i>
             </div>
             <div class="relative group bg-blue-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
-                <span>${escapeHtml(cleanDisplayForm)}</span>
+                <span>${escapeHtml(text)}</span>
                 <button onclick="copyMessageText(this, \`${escapeJsString(plainText)}\`)" title="คัดลอกข้อความ" 
                     class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-blue-700/60 hover:bg-blue-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
                     <i class="fa-regular fa-copy"></i>
@@ -326,7 +296,7 @@ function appendMessage(role, text) {
             </div>
         `;
     } else {
-        const parsedMarkdown = marked.parse(cleanDisplayForm);
+        const parsedMarkdown = marked.parse(text);
         msgDiv.innerHTML = `
             <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
                 <i class="fa-solid fa-robot"></i>
