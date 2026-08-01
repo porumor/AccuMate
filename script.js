@@ -6,7 +6,7 @@ const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่
 2. **การใช้ค่าคิดลดในตาราง:** ทุกการคำนวณมูลค่าปัจจุบัน (Present Value) ของหุ้นกู้, ตั๋วเงินจ่าย หรือเงินกู้ยืม ต้องอ้างอิงและใช้ค่าจากตาราง PVIF และ PVIFA แบบ **ทศนิยม 5 ตำแหน่ง เท่านั้น**
 3. **หลักการปัดเศษทศนิยม:** ผลลัพธ์การคำนวณหรือตัวเลขในตารางตัดบัญชีทุกขั้นตอน หากเศษทศนิยมมีค่า **ตั้งแต่ 0.5 ขึ้นไป ให้ปัดขึ้น** หากเศษทศนิยมมีค่า **ต่ำกว่า 0.5 ให้ปัดลง** เสมอ
 4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของเท่านั้น หากผู้ใช้ถามเรื่องนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
-5. ตอบให้รายละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
+5. ตอบให้ละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
 6. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้มีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต (ในคอลัมน์รายการ สำหรับชื่อบัญชีฝั่งเครดิต ให้พิมพ์ &nbsp;&nbsp;&nbsp;&nbsp; นำหน้าชื่อบัญชี เพื่อเยื้องขวาให้ถูกต้องสวยงามตามหลักบัญชีจริง)
 7. ห้ามใช้โค้ด LaTeX (เช่น $$, \\mathbf, \\text) เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
 
@@ -100,7 +100,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'NVIDIA พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ NVIDIA NIM สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล meta/llama-3.1-70b-instruct พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ NVIDIA NIM สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -210,8 +210,8 @@ async function handleChatSubmit(e) {
 
     const loadingId = appendLoading();
 
-    // ล็อกใช้งานโมเดลของ NVIDIA NIM
-    const targetModel = 'meta/llama-3.1-70b-instruct';
+    // กำหนดโมเดลตามที่ผู้ใช้ระบุในโค้ด Python
+    const targetModel = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
     try {
         const requestMessages = [
@@ -219,24 +219,28 @@ async function handleChatSubmit(e) {
             ...conversationHistory
         ];
 
-        // ยิง Request ไปที่เซิร์ฟเวอร์ NVIDIA
+        // ยิง Request ไปที่เซิร์ฟเวอร์ NVIDIA โดยใส่ Config ตามที่ระบุมาเป๊ะๆ
         const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
+                'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                prompt: "", // ใส่พารามิเตอร์ prompt เปล่าตามโครงสร้าง Python ที่ให้มา
                 model: targetModel,
                 messages: requestMessages,
-                temperature: 0.1,
-                max_tokens: 4096
+                max_tokens: 65536,
+                reasoning_budget: 16384,
+                temperature: 0.6,
+                top_p: 0.95
             })
         });
 
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} บนเซิร์ฟเวอร์ NVIDIA ได้ กรุณาตรวจสอบ API Key หรือโควตาการใช้งาน`);
+            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์ของโมเดล`);
         }
 
         const data = await response.json();
@@ -330,7 +334,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin"></div>
-            <span>NVIDIA NIM กำลังประมวลผลคำตอบ...</span>
+            <span>nemotron-3-nano กำลังใช้เหตุผลวิเคราะห์คำตอบอย่างละเอียด...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
