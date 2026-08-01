@@ -8,21 +8,21 @@ const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่
 4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของเท่านั้น หากผู้ใช้ถามเรื่องนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
 5. ตอบให้ละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
 6. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้มีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต (ในคอลัมน์รายการ สำหรับชื่อบัญชีฝั่งเครดิต ให้พิมพ์ &nbsp;&nbsp;&nbsp;&nbsp; นำหน้าชื่อบัญชี เพื่อเยื้องขวาให้ถูกต้องสวยงามตามหลักบัญชีจริง)
-7. ห้ามใช้โค้ด LaTeX (เช่น $$, \\\\mathbf, \\\\text) เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
+7. ห้ามใช้โค้ด LaTeX (เช่น $$, \\mathbf, \\text) เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
 
 let conversationHistory = [];
 let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
-let attachedFile = null;
 let localDatabaseContent = ""; 
 
+// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
 async function loadLocalDatabase() {
     try {
         const response = await fetch('dataset.txt');
         if (response.ok) {
             localDatabaseContent = await response.text();
-            console.log("Database loaded successfully.");
+            console.log("Groq Database loaded successfully.");
         } else {
             console.warn("dataset.txt not found. Running without local database.");
         }
@@ -38,11 +38,11 @@ function clearApiKey() {
     const iconSpan = document.getElementById('keyBtnIcon');
     
     btn.className = 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
-    if(textSpan) textSpan.innerText = 'เชื่อมต่อ';
-    iconSpan.className = 'fa-solid fa-plug';
+    if(textSpan) textSpan.innerText = 'เชื่อมต่อ Groq';
+    iconSpan.className = 'fa-solid fa-bolt';
     
     isApiConnected = false;
-    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล API Key ของท่านเรียบร้อยแล้ว');
+    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล Groq API Key เรียบร้อยแล้ว');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -51,15 +51,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
-            const helpMsg = '⚠️ หากยังไม่ได้รับ API Key หรือ API มีปัญหา โปรดติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
+            const helpMsg = '⚠️ หากยังไม่ได้รับ Groq API Key สามารถสมัครรับคีย์ฟรีได้ที่ [console.groq.com](https://console.groq.com) หรือติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
             appendMessage('ai', helpMsg);
         }
     }, 10000);
 });
 
+// ฟังก์ชันตรวจสอบความถูกต้องของ Groq API Key
 async function verifyApiKey(key) {
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        const response = await fetch('https://api.groq.com/openai/v1/models', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${key}`
+            }
+        });
         return response.ok;
     } catch (e) {
         return false;
@@ -74,7 +80,7 @@ async function verifyAndSaveKey() {
     const key = keyInput.value.trim();
 
     if (!key) {
-        appendMessage('ai', '⚠️ กรุณาวาง API Key ก่อนกดเชื่อมต่อครับ');
+        appendMessage('ai', '⚠️ กรุณาวาง Groq API Key (เริ่มต้นด้วย gsk_...) ก่อนกดเชื่อมต่อครับ');
         keyInput.focus();
         return;
     }
@@ -91,50 +97,19 @@ async function verifyAndSaveKey() {
         
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-500', 'hover:bg-red-600');
         btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-        if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
+        if(textSpan) textSpan.innerText = 'Groq พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนชั้นกลาง 2 อย่างถูกต้องและครบถ้วนที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้วครับ!** ทำงานด้วยความเร็วสูง ตอบกลับในระดับวินาที พิมพ์คำถามหรือโจทย์บัญชีเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
         if(textSpan) textSpan.innerText = 'คีย์ผิดพลาด';
         iconSpan.className = 'fa-solid fa-xmark';
         
-        appendMessage('ai', '❌ **ข้อผิดพลาด:** สิทธิ์การเข้าถึงระบบไม่ถูกต้อง กรุณาตรวจสอบความถูกต้องของ API Key อีกครั้งครับ');
+        appendMessage('ai', '❌ **ข้อผิดพลาด:** Groq API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์ที่ได้จาก console.groq.com อีกครั้งครับ');
     }
     btn.disabled = false;
-}
-
-function handleFileSelected(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
-        alert('กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ (JPG, PNG) หรือไฟล์ PDF เท่านั้นครับ');
-        event.target.value = '';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const base64String = e.target.result.split(',')[1];
-        attachedFile = {
-            mimeType: file.type,
-            data: base64String,
-            name: file.name
-        };
-
-        document.getElementById('fileNameDisplay').textContent = file.name;
-        document.getElementById('filePreviewContainer').classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-}
-
-function removeAttachedFile() {
-    attachedFile = null;
-    document.getElementById('fileInput').value = '';
-    document.getElementById('filePreviewContainer').classList.add('hidden');
 }
 
 let recognition = null;
@@ -210,105 +185,92 @@ async function handleChatSubmit(e) {
     const apiKeyInputEl = document.getElementById('manualApiKey');
     let apiKey = apiKeyInputEl.value.trim();
 
-    if (!query && !attachedFile) return;
+    if (!query) return;
 
     if (!apiKey) {
-        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ" ก่อนส่งข้อความนะครับ');
+        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ Groq API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ Groq" ก่อนนะครับ');
         apiKeyInputEl.focus();
         return;
     }
 
-    let displayMessage = query;
-    if (attachedFile) {
-        displayMessage = query ? `${query} (แนบไฟล์: ${attachedFile.name})` : `[แนบไฟล์: ${attachedFile.name}]`;
-    }
-    appendMessage('user', displayMessage);
+    appendMessage('user', query);
 
     inputEl.value = '';
     inputEl.blur();
     btnEl.disabled = true;
 
-    const contentParts = [];
-    if (attachedFile) {
-        contentParts.push({
-            inlineData: {
-                mimeType: attachedFile.mimeType,
-                data: attachedFile.data
-            }
-        });
-    }
-
-    let promptText = query ? query : "โปรดช่วยวิเคราะห์คำนวณและแสดงวิธีทำบันทึกบัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดสมบูรณ์ทุกประการ";
+    let userContent = query;
     if (localDatabaseContent) {
-        promptText += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
+        userContent += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
     }
 
-    contentParts.push({ text: promptText });
-
+    // สะสมประวัติการสนทนาในรูปแบบ OpenAI / Groq Format
     conversationHistory.push({
         role: 'user',
-        parts: contentParts
+        content: userContent
     });
 
-    if (conversationHistory.length > 16) {
-        conversationHistory = conversationHistory.slice(-16);
+    if (conversationHistory.length > 12) {
+        conversationHistory = conversationHistory.slice(-12);
     }
 
-    removeAttachedFile();
     const loadingId = appendLoading();
 
+    // รายการโมเดลชั้นนำของ Groq ที่รองรับ (สลับใช้งานอัตโนมัติหากตัวแรกไม่พร้อม)
+    const groqModels = [
+        'llama-3.3-70b-versatile',
+        'deepseek-r1-distill-llama-70b',
+        'gemma2-9b-it',
+        'llama-3.1-8b-instant'
+    ];
+
     try {
-        const requestBody = {
-            contents: conversationHistory,
-            systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-            generationConfig: { 
-                temperature: 0.1,      
-                maxOutputTokens: 8192  
-            }
-        };
-
-        // รายการโมเดลที่จะทำการสลับหาตัวที่ใช้ได้อัตโนมัติ (Fallback System)
-        const fallbackModels = [
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b',
-            'gemini-1.5-pro',
-            'gemini-1.0-pro'
-        ];
-
         let response = null;
         let data = null;
         let success = false;
 
-        // วนลูปทดสอบเพื่อหาโมเดลที่ใช้งานได้ ณ เวลานั้น
-        for (const model of fallbackModels) {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        // วนลูปยิงหาโมเดล Groq ที่พร้อมใช้งานอัตโนมัติ
+        for (const model of groqModels) {
+            const requestMessages = [
+                { role: 'system', content: SYSTEM_INSTRUCTION },
+                ...conversationHistory
+            ];
+
             try {
-                response = await fetch(endpoint, {
+                response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: requestMessages,
+                        temperature: 0.1,
+                        max_tokens: 8192
+                    })
                 });
 
                 if (response.ok) {
                     data = await response.json();
                     success = true;
-                    console.log(`Successfully connected to: ${model}`);
-                    break; // หยุดลูปเมื่อเชื่อมต่อสำเร็จ
+                    console.log(`Successfully generated using Groq model: ${model}`);
+                    break;
                 }
             } catch (err) {
-                console.warn(`Model ${model} failed. Trying next...`);
+                console.warn(`Groq model ${model} failed, switching to next...`);
             }
         }
 
         if (!success || !data) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับโมเดลใดๆ ของ API ได้เลยในขณะนี้ กรุณาตรวจสอบ API Key ของท่านอีกครั้ง");
+            throw new Error("ข้อผิดพลาด: ไม่สามารถประมวลผลผ่าน Groq API ได้ กรุณาตรวจสอบ Groq API Key ของท่านอีกครั้ง");
         }
 
-        const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถประมวลผลคำตอบได้';
+        const aiResponseText = data.choices?.[0]?.message?.content || 'ไม่สามารถประมวลผลคำตอบได้';
 
         conversationHistory.push({
-            role: 'model',
-            parts: [{ text: aiResponseText }]
+            role: 'assistant',
+            content: aiResponseText
         });
 
         removeLoading(loadingId);
@@ -395,11 +357,11 @@ function appendLoading() {
     loadingDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full';
     loadingDiv.innerHTML = `
         <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
-            <i class="fa-solid fa-robot animate-pulse"></i>
+            <i class="fa-solid fa-bolt text-amber-500 animate-pulse"></i>
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>กำลังคิดวิเคราะห์คำนวณและประมวลผลตามหลักการบัญชีอย่างละเอียด...</span>
+            <span>Groq กำลังประมวลผลคำตอบความเร็วสูง...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
