@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AccuMate - AI Tutor</title>
+    <title>AccuMate - AI Tutor (Powered by Groq)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -17,13 +17,13 @@
         <header class="h-14 md:h-16 border-b border-slate-200/80 px-3 md:px-6 flex items-center justify-end bg-white/90 backdrop-blur-md z-20 shrink-0 shadow-xs">
             <div class="flex items-center gap-1.5 md:gap-2.5 w-full md:w-auto justify-end">
                 <div class="relative flex-1 md:flex-initial">
-                    <input type="password" id="manualApiKey" placeholder="ใส่ API Key..." 
+                    <input type="password" id="manualApiKey" placeholder="ใส่ Groq API Key (gsk_...)" 
                         class="w-full md:w-64 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-400">
                 </div>
                 <button id="saveKeyBtn" onclick="verifyAndSaveKey()" title="บันทึกและตรวจสอบคีย์"
                     class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer">
-                    <span class="hidden sm:inline" id="keyBtnText">เชื่อมต่อ</span>
-                    <i id="keyBtnIcon" class="fa-solid fa-plug"></i>
+                    <span class="hidden sm:inline" id="keyBtnText">เชื่อมต่อ Groq</span>
+                    <i id="keyBtnIcon" class="fa-solid fa-bolt"></i>
                 </button>
                 <button id="clearKeyBtn" onclick="clearApiKey()" title="ล้าง API Key"
                     class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer">
@@ -41,15 +41,15 @@
                 </div>
                 <div class="bg-white border border-slate-200/80 p-4 md:p-5 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-700 shadow-xs space-y-3 md:space-y-4 flex-1 overflow-hidden">
                     <div>
-                        <p class="font-semibold text-slate-900 text-sm md:text-base mb-1">สวัสดีครับ! ผมคือ AccuMate ผู้ช่วยติววิชาบัญชีของคุณ</p>
+                        <p class="font-semibold text-slate-900 text-sm md:text-base mb-1">สวัสดีครับ! ผมคือ AccuMate AI Tutor (ขับเคลื่อนด้วย Groq)</p>
                         <p class="text-slate-600 leading-relaxed">
-                            พร้อมให้คำปรึกษา อธิบายเนื้อหา และแสดงวิธีทำโจทย์วิชาบัญชีอย่างละเอียดทุกขั้นตอน คุณสามารถพิมพ์คำถาม หรือ **อัปโหลดไฟล์ภาพโจทย์ / ไฟล์ PDF** เพื่อให้ผมช่วยประมวลผลคำนวณและบันทึกบัญชีได้เลยครับ
+                            พร้อมตอบคำถามบัญชีอย่างรวดเร็วและแม่นยำ อ้างอิงตรรกะและเนื้อหาตามหนังสือเรียนการบัญชีชั้นกลาง 2 ครับ สามารถพิมพ์โจทย์หรือสอบถามได้ทันที!
                         </p>
                     </div>
 
                     <div class="pt-2.5 border-t border-slate-100">
                         <p class="text-[11px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                            <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> หัวข้อสอบถามบ่อย (คลิกเพื่อเริ่มถามได้ทันที):
+                            <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> หัวข้อสอบถามบ่อย:
                         </p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <button onclick="sendQuickQuery('ช่วยอธิบายขั้นตอนการไถ่ถอนหุ้นกู้ก่อนกำหนดทำเป็นสเต็ป พร้อมวิธีบันทึกบัญชีอย่างละเอียดครบถ้วน')" 
@@ -72,26 +72,9 @@
 
         <div class="p-3 sm:p-4 md:p-6 pb-6 md:pb-8 bg-white border-t border-slate-200/80 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] shrink-0 relative">
             <div class="max-w-4xl mx-auto w-full">
-                <div id="filePreviewContainer" class="hidden mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-700">
-                    <div class="flex items-center gap-2 truncate">
-                        <i class="fa-solid fa-file-arrow-up text-blue-500 shrink-0"></i>
-                        <span id="fileNameDisplay" class="font-medium truncate">แนบไฟล์แล้ว</span>
-                    </div>
-                    <button type="button" onclick="removeAttachedFile()" class="text-red-500 hover:text-red-700 font-semibold px-2 py-0.5 cursor-pointer shrink-0">
-                        <i class="fa-solid fa-xmark"></i> ยกเลิก
-                    </button>
-                </div>
-
                 <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl md:rounded-full px-3 md:px-5 py-2.5 md:py-3.5 shadow-inner focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                     
-                    <input type="file" id="fileInput" accept="image/*,application/pdf" class="hidden" onchange="handleFileSelected(event)">
-                    
-                    <button type="button" onclick="document.getElementById('fileInput').click()" title="แนบไฟล์รูปภาพหรือ PDF"
-                        class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-transparent hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all shrink-0 mr-1 cursor-pointer">
-                        <i class="fa-solid fa-paperclip text-sm"></i>
-                    </button>
-
-                    <input type="text" id="userInput" placeholder="ถาม AccuMate หรืออัปโหลดโจทย์..." 
+                    <input type="text" id="userInput" placeholder="ถาม AccuMate หรือพิมพ์โจทย์บัญชี..." 
                         class="flex-1 bg-transparent border-none px-2 md:px-3 text-sm md:text-[15px] text-slate-800 placeholder-slate-400 focus:outline-none min-w-0">
                     
                     <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
@@ -108,7 +91,7 @@
                 </form>
             </div>
             <div class="absolute bottom-1.5 md:bottom-2 left-0 right-0 text-center">
-                <p class="text-[9px] md:text-[10px] text-slate-400 font-light">© 2026 AccuMate. All rights reserved.</p>
+                <p class="text-[9px] md:text-[10px] text-slate-400 font-light">© 2026 AccuMate. Powered by Groq API.</p>
             </div>
         </div>
     </main>
