@@ -1,118 +1,558 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AccuMate - AI Tutor (Powered by Gemini)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>แชทบอทด้วย Gemini</title>
+    <!-- ใช้ Google Fonts เพื่อความสวยงาม -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            font-size: 14px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .api-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .api-section input {
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 13px;
+            width: 220px;
+            transition: all 0.3s;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .api-section input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .api-section input:focus {
+            outline: none;
+            border-color: #f093fb;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status.online {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.15);
+        }
+
+        .status.offline {
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.15);
+        }
+
+        /* Chat Box */
+        .chat-box {
+            margin-top: 20px;
+            height: 420px;
+            overflow-y: auto;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.08);
+            color: #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.ai .label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 4px;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 18px;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            display: none;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 3px;
+            animation: typing 1.4s infinite both;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        /* Input Area */
+        .input-area {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 15px;
+            resize: none;
+            font-family: 'Sarabun', sans-serif;
+            min-height: 50px;
+            max-height: 150px;
+            transition: all 0.3s;
+        }
+
+        .input-area textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-area textarea:focus {
+            outline: none;
+            border-color: #f093fb;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .input-area .btn {
+            padding: 12px 24px;
+            font-size: 15px;
+            border-radius: 16px;
+            min-height: 50px;
+            white-space: nowrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .api-section {
+                flex-direction: column;
+            }
+            .api-section input {
+                width: 100%;
+            }
+            .message {
+                max-width: 95%;
+            }
+            .input-area {
+                flex-direction: column;
+            }
+            .input-area .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-<body class="h-[100dvh] flex flex-col overflow-hidden bg-slate-50 text-slate-800">
+<body>
 
-    <main class="flex-1 flex flex-col h-full relative overflow-hidden w-full">
-        
-        <header class="h-14 md:h-16 border-b border-slate-200/80 px-3 md:px-6 flex items-center justify-end bg-white/90 backdrop-blur-md z-20 shrink-0 shadow-xs">
-            <div class="flex items-center gap-1.5 md:gap-2.5 w-full md:w-auto justify-end">
-                <div class="relative flex-1 md:flex-initial">
-                    <input type="password" id="manualApiKey" placeholder="ใส่ Google Gemini API Key..." 
-                        class="w-full md:w-64 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-400">
-                </div>
-                <button id="saveKeyBtn" onclick="verifyAndSaveKey()" title="บันทึกและตรวจสอบคีย์"
-                    class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer">
-                    <span class="hidden sm:inline" id="keyBtnText">เชื่อมต่อ Gemini</span>
-                    <i id="keyBtnIcon" class="fa-solid fa-plug"></i>
-                </button>
-                <button id="clearKeyBtn" onclick="clearApiKey()" title="ล้าง API Key"
-                    class="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer">
-                    <span class="hidden sm:inline">ล้างคีย์</span>
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </div>
-        </header>
-
-        <div id="chatHistory" class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 scroll-smooth">
-            
-            <div class="flex gap-3 md:gap-4 max-w-4xl mx-auto w-full">
-                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-blue-600 shrink-0 text-sm md:text-base">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div class="bg-white border border-slate-200/80 p-4 md:p-5 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-700 shadow-xs space-y-3 md:space-y-4 flex-1 overflow-hidden">
-                    <div>
-                        <p class="font-semibold text-slate-900 text-sm md:text-base mb-1">สวัสดีครับ! ผมคือ AccuMate AI Tutor (Powered by Google Gemini)</p>
-                        <p class="text-slate-600 leading-relaxed">
-                            พร้อมให้คำปรึกษา อธิบายเนื้อหา และแสดงวิธีทำโจทย์วิชาบัญชีอย่างละเอียดทุกขั้นตอน คุณสามารถพิมพ์คำถาม หรือ **อัปโหลดไฟล์ภาพโจทย์ / ไฟล์ PDF** เพื่อให้ผมช่วยประมวลผลคำนวณและบันทึกบัญชีได้เลยครับ
-                        </p>
-                    </div>
-
-                    <div class="pt-2.5 border-t border-slate-100">
-                        <p class="text-[11px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                            <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> หัวข้อสอบถามบ่อย (คลิกเพื่อเริ่มถามได้ทันที):
-                        </p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <button onclick="sendQuickQuery('ช่วยอธิบายขั้นตอนการไถ่ถอนหุ้นกู้ก่อนกำหนดทำเป็นสเต็ป พร้อมวิธีบันทึกบัญชีอย่างละเอียดครบถ้วน')" 
-                                class="text-left text-xs p-2.5 md:p-3 rounded-xl bg-slate-50 hover:bg-blue-50/50 border border-slate-200/80 hover:border-blue-200 text-slate-600 transition-all flex items-center gap-2 group cursor-pointer">
-                                <i class="fa-solid fa-file-invoice-dollar text-slate-400 group-hover:text-emerald-500 shrink-0"></i>
-                                <span class="leading-relaxed truncate">ไถ่ถอนหุ้นกู้ก่อนกำหนด</span>
-                            </button>
-
-                            <button onclick="sendQuickQuery('ช่วยอธิบายวิธีการคำนวณราคาขายหุ้นกู้ และการบันทึกบัญชีเมื่อออกจำหน่ายหุ้นกู้ อย่างละเอียด')" 
-                                class="text-left text-xs p-2.5 md:p-3 rounded-xl bg-slate-50 hover:bg-blue-50/50 border border-slate-200/80 hover:border-blue-200 text-slate-600 transition-all flex items-center gap-2 group cursor-pointer">
-                                <i class="fa-solid fa-chart-line text-slate-400 group-hover:text-blue-500 shrink-0"></i>
-                                <span class="leading-relaxed truncate">การคำนวณราคาขายหุ้นกู้</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="p-3 sm:p-4 md:p-6 pb-6 md:pb-8 bg-white border-t border-slate-200/80 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] shrink-0 relative">
-            <div class="max-w-4xl mx-auto w-full">
-                <div id="filePreviewContainer" class="hidden mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-700">
-                    <div class="flex items-center gap-2 truncate">
-                        <i class="fa-solid fa-file-arrow-up text-blue-500 shrink-0"></i>
-                        <span id="fileNameDisplay" class="font-medium truncate">แนบไฟล์แล้ว</span>
-                    </div>
-                    <button type="button" onclick="removeAttachedFile()" class="text-red-500 hover:text-red-700 font-semibold px-2 py-0.5 cursor-pointer shrink-0">
-                        <i class="fa-solid fa-xmark"></i> ยกเลิก
-                    </button>
-                </div>
-
-                <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl md:rounded-full px-3 md:px-5 py-2.5 md:py-3.5 shadow-inner focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                    
-                    <input type="file" id="fileInput" accept="image/*,application/pdf" class="hidden" onchange="handleFileSelected(event)">
-                    
-                    <button type="button" onclick="document.getElementById('fileInput').click()" title="แนบไฟล์รูปภาพหรือ PDF"
-                        class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-transparent hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all shrink-0 mr-1 cursor-pointer">
-                        <i class="fa-solid fa-paperclip text-sm"></i>
-                    </button>
-
-                    <input type="text" id="userInput" placeholder="ถาม AccuMate หรืออัปโหลดโจทย์..." 
-                        class="flex-1 bg-transparent border-none px-2 md:px-3 text-sm md:text-[15px] text-slate-800 placeholder-slate-400 focus:outline-none min-w-0">
-                    
-                    <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
-                        <button type="button" id="micBtn" onclick="toggleSpeechRecognition()" title="พูดเพื่อพิมพ์"
-                            class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white hover:bg-slate-200 text-slate-600 border border-slate-300 flex items-center justify-center transition-all shadow-xs cursor-pointer">
-                            <i class="fa-solid fa-microphone text-xs md:text-sm"></i>
-                        </button>
-
-                        <button type="submit" id="sendBtn" title="ส่งข้อความ"
-                            class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white flex items-center justify-center transition-all shadow-md shadow-blue-600/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-                            <i class="fa-solid fa-arrow-up text-xs md:text-sm"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div class="absolute bottom-1.5 md:bottom-2 left-0 right-0 text-center">
-                <p class="text-[9px] md:text-[10px] text-slate-400 font-light">© 2026 AccuMate. Powered by Google Gemini API.</p>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                🤖 แชทบอท
+                <span>Gemini</span>
+            </h1>
+            <div class="api-section">
+                <input type="password" id="apiKeyInput" placeholder="ใส่ Gemini API Key..." />
+                <button class="btn btn-primary" id="saveKeyBtn">บันทึก</button>
+                <span class="status offline" id="statusBadge">● ไม่ได้เชื่อมต่อ</span>
             </div>
         </div>
-    </main>
 
-    <script src="script.js"></script>
+        <!-- Chat Box -->
+        <div class="chat-box" id="chatBox">
+            <div class="message ai">
+                <div class="label">🤖 Gemini</div>
+                สวัสดีครับ! ผมคือแชทบอทที่ใช้ Gemini API<br />
+                👉 กรุณาใส่ <strong>API Key</strong> ด้านบนแล้วกด "บันทึก" เพื่อเริ่มใช้งาน
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <textarea id="userInput" rows="1" placeholder="พิมพ์ข้อความที่นี่..." disabled></textarea>
+            <button class="btn btn-primary" id="sendBtn" disabled>ส่ง ➤</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 1. ตัวแปรและ DOM References
+        // ============================================
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveKeyBtn = document.getElementById('saveKeyBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        let API_KEY = localStorage.getItem('gemini_api_key') || '';
+        let isReady = false;
+
+        // ============================================
+        // 2. ฟังก์ชันจัดการ API Key
+        // ============================================
+        function loadSavedKey() {
+            const saved = localStorage.getItem('gemini_api_key');
+            if (saved) {
+                API_KEY = saved;
+                apiKeyInput.value = '••••••••••••••••';
+                setReady(true);
+            } else {
+                setReady(false);
+            }
+        }
+
+        function saveKey() {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                alert('⚠️ กรุณาใส่ API Key ให้ถูกต้อง');
+                return;
+            }
+            API_KEY = key;
+            localStorage.setItem('gemini_api_key', key);
+            apiKeyInput.value = '••••••••••••••••';
+            setReady(true);
+            addMessage('ai', '✅ บันทึก API Key สำเร็จ! พร้อมใช้งานแล้วครับ');
+        }
+
+        function setReady(ready) {
+            isReady = ready;
+            userInput.disabled = !ready;
+            sendBtn.disabled = !ready;
+            if (ready) {
+                statusBadge.textContent = '● พร้อมใช้งาน';
+                statusBadge.className = 'status online';
+            } else {
+                statusBadge.textContent = '● รอใส่ API Key';
+                statusBadge.className = 'status offline';
+            }
+        }
+
+        // ============================================
+        // 3. ฟังก์ชันส่งข้อความไป Gemini
+        // ============================================
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text || !isReady) return;
+
+            // แสดงข้อความผู้ใช้
+            addMessage('user', text);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // เปิด typing indicator
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+
+            try {
+                const response = await callGeminiAPI(text);
+                // ซ่อน typing
+                typingIndicator.style.display = 'none';
+                // แสดงข้อความ AI
+                addMessage('ai', response);
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                console.error('Error:', error);
+                addMessage('ai', '❌ ขออภัยครับ เกิดข้อผิดพลาด: ' + error.message);
+            }
+
+            scrollToBottom();
+        }
+
+        // ============================================
+        // 4. เรียก Gemini API
+        // ============================================
+        async function callGeminiAPI(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                const errorMsg = errorData.error?.message || 'ไม่ทราบสาเหตุ';
+                throw new Error(`API Error (${response.status}): ${errorMsg}`);
+            }
+
+            const data = await response.json();
+
+            // ดึงข้อความจาก response
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) {
+                throw new Error('ไม่ได้รับข้อความตอบกลับจาก Gemini');
+            }
+            return text;
+        }
+
+        // ============================================
+        // 5. ฟังก์ชันแสดงข้อความในแชท
+        // ============================================
+        function addMessage(type, content) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+
+            if (type === 'ai') {
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.textContent = '🤖 Gemini';
+                div.appendChild(label);
+                const textNode = document.createElement('span');
+                // แปลง \n เป็น <br>
+                textNode.innerHTML = content.replace(/\n/g, '<br>');
+                div.appendChild(textNode);
+            } else {
+                div.textContent = content;
+            }
+
+            chatBox.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ============================================
+        // 6. Event Listeners
+        // ============================================
+
+        // บันทึก API Key
+        saveKeyBtn.addEventListener('click', saveKey);
+
+        // กด Enter ส่งข้อความ (Shift+Enter = ขึ้นบรรทัดใหม่)
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ปุ่มส่ง
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', () => {
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 150) + 'px';
+        });
+
+        // คลิกที่ช่อง API Key ให้เคลียร์ข้อความแสดง
+        apiKeyInput.addEventListener('focus', () => {
+            if (apiKeyInput.value === '••••••••••••••••') {
+                apiKeyInput.value = '';
+            }
+        });
+
+        // ============================================
+        // 7. โหลดข้อมูลที่บันทึกไว้
+        // ============================================
+        loadSavedKey();
+
+        // ถ้ามี API Key อยู่แล้ว แสดงข้อความต้อนรับ
+        if (isReady) {
+            setTimeout(() => {
+                addMessage('ai', '👋 สวัสดีอีกครั้ง! พร้อมตอบคำถามแล้วครับ');
+            }, 500);
+        }
+
+        console.log('✅ Gemini Chatbot พร้อมทำงาน!');
+    </script>
+
 </body>
 </html>
