@@ -100,7 +100,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'Groq พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล llama-3.3-70b-versatile (ตอบเร็ว โควตาสูง ไม่ติด Rate Limit) พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล llama-3.3-70b-versatile พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -210,7 +210,7 @@ async function handleChatSubmit(e) {
 
     const loadingId = appendLoading();
 
-    // บังคับล็อกเฉพาะโมเดล llama-3.3-70b-versatile เท่านั้น
+    // ล็อกใช้งานโมเดล llama-3.3-70b-versatile
     const targetModel = 'llama-3.3-70b-versatile';
 
     try {
