@@ -1,5 +1,5 @@
 const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย (เน้นวิชาการบัญชีชั้นกลาง 2 บทที่ 1 หนี้สินหมุนเวียน และ บทที่ 2 หนี้สินไม่หมุนเวียนและหนี้สินที่อาจเกิดขึ้น)
-หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามมาตรฐานการรายงานทางการเงิน (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) อย่างถูกต้องครบถ้วน
+หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามคู่มือเรียนการบัญชีชั้นกลาง 2 (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) ที่อยู่ในไฟล์ฐานข้อมูล DATABASE เป็นหลักเท่านั้น
 
 กฎเหล็กด้านตรรกะและการคำนวณ (Strict Rules - ห้ามฝ่าฝืนหรือพลาดเด็ดขาด):
 1. **ใช้ตัวเลขตามโจทย์เท่านั้น:** ห้ามคิดตัวเลขขึ้นมาเอง ห้ามสมมติฐาน หรืออ้างอิงตัวเลขอื่นที่นอกเหนือจากโจทย์ระบุเด็ดขาด
@@ -14,6 +14,22 @@ let conversationHistory = [];
 let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
+let localDatabaseContent = ""; 
+
+// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
+async function loadLocalDatabase() {
+    try {
+        const response = await fetch('dataset.txt');
+        if (response.ok) {
+            localDatabaseContent = await response.text();
+            console.log("Database loaded successfully.");
+        } else {
+            console.warn("dataset.txt not found. Running without local database.");
+        }
+    } catch (error) {
+        console.error("Error loading database file:", error);
+    }
+}
 
 function clearApiKey() {
     document.getElementById('manualApiKey').value = '';
@@ -30,6 +46,8 @@ function clearApiKey() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    loadLocalDatabase();
+
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
@@ -82,7 +100,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'Groq พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้วครับ!** ทำงานด้วยความเร็วสูง ตอบกลับในระดับวินาที พิมพ์คำถามหรือโจทย์บัญชีเข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการประมวลผลด้วยโมเดล openai/gpt-oss-120b พร้อมตอบคำถามและคำนวณโจทย์บัญชี พิมพ์คำถามเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -181,7 +199,6 @@ async function handleChatSubmit(e) {
     inputEl.blur();
     btnEl.disabled = true;
 
-    // เก็บเฉพาะประวัติการคุยของผู้ใช้ย้อนหลัง
     conversationHistory.push({
         role: 'user',
         content: query
@@ -193,54 +210,35 @@ async function handleChatSubmit(e) {
 
     const loadingId = appendLoading();
 
-    // รายการโมเดลของ Groq (ใช้อันแรกเป็นหลัก)
-    const groqModels = [
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant',
-        'gemma2-9b-it'
-    ];
+    // บังคับล็อกเฉพาะโมเดล openai/gpt-oss-120b เท่านั้น
+    const targetModel = 'openai/gpt-oss-120b';
 
     try {
-        let response = null;
-        let data = null;
-        let success = false;
+        const requestMessages = [
+            { role: 'system', content: SYSTEM_INSTRUCTION },
+            ...conversationHistory
+        ];
 
-        for (const model of groqModels) {
-            const requestMessages = [
-                { role: 'system', content: SYSTEM_INSTRUCTION },
-                ...conversationHistory
-            ];
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: targetModel,
+                messages: requestMessages,
+                temperature: 0.1,
+                max_tokens: 4096
+            })
+        });
 
-            try {
-                response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: requestMessages,
-                        temperature: 0.1,
-                        max_tokens: 4096
-                    })
-                });
-
-                if (response.ok) {
-                    data = await response.json();
-                    success = true;
-                    console.log(`Successfully generated using Groq model: ${model}`);
-                    break;
-                }
-            } catch (err) {
-                console.warn(`Groq model ${model} failed, switching to next...`);
-            }
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์การใช้งานโมเดลนี้`);
         }
 
-        if (!success || !data) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถประมวลผลผ่าน Groq API ได้ กรุณาตรวจสอบ Groq API Key อีกครั้ง");
-        }
-
+        const data = await response.json();
         const aiResponseText = data.choices?.[0]?.message?.content || 'ไม่สามารถประมวลผลคำตอบได้';
 
         conversationHistory.push({
@@ -331,7 +329,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>Groq กำลังประมวลผลคำตอบความเร็วสูง...</span>
+            <span>openai/gpt-oss-120b กำลังประมวลผลคำตอบ...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
