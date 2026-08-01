@@ -17,7 +17,6 @@ let apiTimeout = null;
 let attachedFile = null;
 let localDatabaseContent = ""; 
 
-// โหลดฐานข้อมูลจากไฟล์ dataset.txt อัตโนมัติหลังบ้าน
 async function loadLocalDatabase() {
     try {
         const response = await fetch('dataset.txt');
@@ -58,10 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 10000);
 });
 
-// ตรวจสอบ Google Gemini API Key
 async function verifyApiKey(key) {
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key.trim()}`);
         return response.ok;
     } catch (e) {
         return false;
@@ -96,7 +94,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '✅ **ระบบเชื่อมต่อ Google Gemini API สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนอย่างถูกต้องที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
+        appendMessage('ai', '✅ **เชื่อมต่อ Google Gemini สำเร็จ!** ล็อกการทำงานด้วยโมเดล `gemini-1.5-flash` (ฟรีและเสถียรที่สุด) พร้อมตอบคำถามและคำนวณโจทย์บัญชี พิมพ์คำถามเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -215,7 +213,7 @@ async function handleChatSubmit(e) {
     if (!query && !attachedFile) return;
 
     if (!apiKey) {
-        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ Gemini" ก่อนส่งข้อความนะครับ');
+        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ API Key ครับ กรุณาวางคีย์ที่มุมขวาบนก่อนส่งข้อความนะครับ');
         apiKeyInputEl.focus();
         return;
     }
@@ -230,7 +228,6 @@ async function handleChatSubmit(e) {
     inputEl.blur();
     btnEl.disabled = true;
 
-    // โครงสร้าง Payload สำหรับ Google Gemini
     const contentParts = [];
     if (attachedFile) {
         contentParts.push({
@@ -260,6 +257,9 @@ async function handleChatSubmit(e) {
     removeAttachedFile();
     const loadingId = appendLoading();
 
+    // ล็อกใช้โมเดล gemini-1.5-flash ตัวหลักที่เปิดให้ใช้ฟรี
+    const targetModel = 'gemini-1.5-flash';
+
     try {
         const requestBody = {
             contents: conversationHistory,
@@ -270,41 +270,20 @@ async function handleChatSubmit(e) {
             }
         };
 
-        // ระบบ Auto-Fallback วิ่งหาโมเดล Gemini ที่พร้อมใช้งาน ป้องกันเว็บล่ม 100%
-        const geminiModels = [
-            'gemini-1.5-flash',
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-pro'
-        ];
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
 
-        let response = null;
-        let data = null;
-        let success = false;
-
-        for (const model of geminiModels) {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            try {
-                response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (response.ok) {
-                    data = await response.json();
-                    success = true;
-                    console.log(`Successfully generated using Gemini model: ${model}`);
-                    break;
-                }
-            } catch (err) {
-                console.warn(`Gemini model ${model} failed. Trying next...`);
-            }
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || "ไม่สามารถเชื่อมต่อกับ Google Gemini ได้ กรุณาตรวจสอบ API Key อีกครั้ง");
         }
 
-        if (!success || !data) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับ Google Gemini ได้ในขณะนี้ กรุณาตรวจสอบ API Key หรือลองใหม่อีกครั้ง");
-        }
-
+        const data = await response.json();
         const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถประมวลผลคำตอบได้';
 
         conversationHistory.push({
@@ -400,7 +379,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>Google Gemini กำลังวิเคราะห์และประมวลผลคำตอบ...</span>
+            <span>Google Gemini กำลังประมวลผลคำตอบ...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
