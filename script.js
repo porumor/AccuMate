@@ -15,9 +15,8 @@ let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
 let attachedFile = null;
-let localDatabaseContent = ""; // ตัวแปรสำหรับเก็บเนื้อหาจากไฟล์ dataset.txt
+let localDatabaseContent = ""; 
 
-// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt อัตโนมัติหลังบ้าน
 async function loadLocalDatabase() {
     try {
         const response = await fetch('dataset.txt');
@@ -47,7 +46,6 @@ function clearApiKey() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // โหลดไฟล์ dataset.txt ทันทีที่เปิดหน้าเว็บ
     loadLocalDatabase();
 
     apiTimeout = setTimeout(() => {
@@ -96,7 +94,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** พิมพ์โจทย์ อัปโหลดภาพ/PDF หรือคลิกหัวข้อด้านบนเพื่อเริ่มติวได้เลยครับ');
+        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนชั้นกลาง 2 อย่างถูกต้องและครบถ้วนที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -240,7 +238,6 @@ async function handleChatSubmit(e) {
         });
     }
 
-    // รวมคำถามของผู้ใช้ เข้ากับเนื้อหาฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
     let promptText = query ? query : "โปรดช่วยวิเคราะห์คำนวณและแสดงวิธีทำบันทึกบัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดสมบูรณ์ทุกประการ";
     if (localDatabaseContent) {
         promptText += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
@@ -261,8 +258,8 @@ async function handleChatSubmit(e) {
     const loadingId = appendLoading();
 
     try {
-        // บังคับล็อกเฉพาะโมเดล gemini-3.5-flash-lite เท่านั้น
-        const modelName = 'gemini-3.5-flash-lite';
+        // บังคับล็อกใช้เฉพาะโมเดล gemini-3.1-flash-lite เท่านั้น
+        const modelName = 'gemini-3.1-flash-lite';
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
         const requestBody = {
@@ -274,7 +271,6 @@ async function handleChatSubmit(e) {
             }
         };
 
-        // ยิงคำสั่งไปยัง gemini-3.5-flash-lite โดยตรง (ไม่มีระบบสลับโมเดล)
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -282,7 +278,7 @@ async function handleChatSubmit(e) {
         });
 
         if (!response.ok) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถเรียกใช้งานโมเดล gemini-3.5-flash-lite ได้ กรุณาตรวจสอบความถูกต้องของ API Key หรือสิทธิ์การเข้าถึงโมเดลนี้อีกครั้ง");
+            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับโมเดล gemini-3.1-flash-lite ได้ กรุณาตรวจสอบความถูกต้องของ API Key หรือสิทธิ์การเข้าถึงโมเดลนี้อีกครั้ง");
         }
 
         const data = await response.json();
@@ -381,7 +377,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>กำลังคิดวิเคราะห์คำนวณและประมวลผลตามหลักการบัญชีอย่างรายละเอียด...</span>
+            <span>กำลังคิดวิเคราะห์คำนวณและประมวลผลตามหลักการบัญชีอย่างละเอียด...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
