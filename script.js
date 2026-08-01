@@ -258,10 +258,6 @@ async function handleChatSubmit(e) {
     const loadingId = appendLoading();
 
     try {
-        // บังคับล็อกใช้เฉพาะโมเดล gemini-3.1-flash-lite เท่านั้น
-        const modelName = 'gemini-3.1-flash-lite';
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-
         const requestBody = {
             contents: conversationHistory,
             systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
@@ -271,17 +267,43 @@ async function handleChatSubmit(e) {
             }
         };
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
-        });
+        // รายการโมเดลที่จะทำการสลับหาตัวที่ใช้ได้อัตโนมัติ (Fallback System)
+        const fallbackModels = [
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.5-pro',
+            'gemini-1.0-pro'
+        ];
 
-        if (!response.ok) {
-            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับโมเดล gemini-3.1-flash-lite ได้ กรุณาตรวจสอบความถูกต้องของ API Key หรือสิทธิ์การเข้าถึงโมเดลนี้อีกครั้ง");
+        let response = null;
+        let data = null;
+        let success = false;
+
+        // วนลูปทดสอบเพื่อหาโมเดลที่ใช้งานได้ ณ เวลานั้น
+        for (const model of fallbackModels) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            try {
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (response.ok) {
+                    data = await response.json();
+                    success = true;
+                    console.log(`Successfully connected to: ${model}`);
+                    break; // หยุดลูปเมื่อเชื่อมต่อสำเร็จ
+                }
+            } catch (err) {
+                console.warn(`Model ${model} failed. Trying next...`);
+            }
         }
 
-        const data = await response.json();
+        if (!success || !data) {
+            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับโมเดลใดๆ ของ API ได้เลยในขณะนี้ กรุณาตรวจสอบ API Key ของท่านอีกครั้ง");
+        }
+
         const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถประมวลผลคำตอบได้';
 
         conversationHistory.push({
