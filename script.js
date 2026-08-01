@@ -1,31 +1,44 @@
-const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย (เน้นวิชาการบัญชีชั้นกลาง 2 บทที่ 1 หนี้สินหมุนเวียน และ บทที่ 2 หนี้สินไม่หมุนเวียนและหนี้สินที่อาจเกิดขึ้น)
-หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามหนังสือการบัญชีชั้นกลาง 2 (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) เป็นหลักเท่านั้น
+const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย
+หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ และข้อมูลจากไฟล์ฐานข้อมูลหนังสือเรียนการบัญชีชั้นกลาง 2 (ที่ระบบแนบไปให้ในหัวข้อ DATABASE) เป็นหลักเท่านั้น
 
-กฎการคำนวณและตรรกะสูงสุด (Strict Rules - ห้ามฝ่าฝืนเด็ดขาด):
-1. **ใช้ตัวเลขตามโจทย์เท่านั้น:** ห้ามสมมติหรืออ้างอิงตัวเลขใดๆ นอกเหนือจากที่ระบุในโจทย์เด็ดขาด
-2. **การใช้ค่า PVIF และ PVIFA:** ทุกการคำนวณมูลค่าปัจจุบัน ต้องใช้ค่าตาราง PVIF และ PVIFA แบบ **ทศนิยม 5 ตำแหน่ง เท่านั้น**
-3. **หลักการปัดเศษ:** ผลลัพธ์การคำนวณหรือตัวเลขเงินตราทุกขั้นตอน หากมีเศษทศนิยม **ตั้งแต่ 0.5 ขึ้นไป ให้ปัดขึ้น** หากมีเศษทศนิยม **ต่ำกว่า 0.5 ให้ปัดลง** เสมอ
-4. ขอบเขตเนื้อหา: ตอบคำถามเฉพาะที่เกี่ยวกับเนื้อหาวิชาบัญชีเท่านั้น หากนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพ
-5. ตอบให้ละเอียดครบถ้วนทุกประเด็น ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ ต้องแสดงวิธีคิดและการคำนวณให้ครบถ้วนตั้งแต่ต้นจนจบ
-6. ในส่วนของการคำนวณ วิธีทำ ให้แสดงสูตร ที่มาของตัวเลข และแจกแจงทีละ Step อย่างละเอียด ห้ามข้ามขั้นตอน
-7. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้เหมือนสมุดบัญชีจริง โดยมีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต
-8. ห้ามใช้โค้ด LaTeX เด็ดขาด ให้ใช้ข้อความธรรมดาและ Markdown เท่านั้น`;
+กฎการคำนวณและตรรกะสูงสุด (Strict Rules - ห้ามฝ่าฝืนหรือพลาดเด็ดขาด):
+1. **ใช้ตัวเลขตามโจทย์เท่านั้น:** ห้ามคิดตัวเลขขึ้นมาเอง ห้ามสมมติฐาน หรืออ้างอิงตัวเลขอื่นที่นอกเหนือจากโจทย์ระบุเด็ดขาด
+2. **การใช้ค่าคิดลดในตาราง:** ทุกการคำนวณมูลค่าปัจจุบัน (Present Value) ของหุ้นกู้, ตั๋วเงินจ่าย หรือเงินกู้ยืม ต้องอ้างอิงและใช้ค่าจากตาราง PVIF และ PVIFA แบบ **ทศนิยม 5 ตำแหน่ง เท่านั้น**
+3. **หลักการปัดเศษทศนิยม:** ผลลัพธ์การคำนวณหรือตัวเลขในตารางตัดบัญชีทุกขั้นตอน หากเศษทศนิยมมีค่า **ตั้งแต่ 0.5 ขึ้นไป ให้ปัดขึ้น** หากเศษทศนิยมมีค่า **ต่ำกว่า 0.5 ให้ปัดลง** เสมอ
+4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของตามที่มีใน DATABASE เท่านั้น หากนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
+5. ตอบให้ละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
+6. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้มีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต (ในคอลัมน์รายการ สำหรับชื่อบัญชีฝั่งเครดิต ให้พิมพ์ &nbsp;&nbsp;&nbsp;&nbsp; นำหน้าชื่อบัญชี เพื่อเยื้องขวาให้ถูกต้องสวยงามตามหลักบัญชีจริง)
+7. ห้ามใช้โค้ด LaTeX เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
 
 let conversationHistory = [];
 let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
 let attachedFile = null;
+let localDatabaseContent = ""; // ตัวแปรสำหรับเก็บเนื้อหาจากไฟล์ dataset.txt
+
+// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt อัตโนมัติหลังบ้าน
+async function loadLocalDatabase() {
+    try {
+        const response = await fetch('dataset.txt');
+        if (response.ok) {
+            localDatabaseContent = await response.text();
+            console.log("Database loaded successfully.");
+        } else {
+            console.warn("dataset.txt not found. Running without local database.");
+        }
+    } catch (error) {
+        console.error("Error loading database file:", error);
+    }
+}
 
 function clearApiKey() {
     document.getElementById('manualApiKey').value = '';
-    
     const btn = document.getElementById('saveKeyBtn');
     const textSpan = document.getElementById('keyBtnText');
     const iconSpan = document.getElementById('keyBtnIcon');
     
-    btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'bg-red-500', 'hover:bg-red-600');
-    btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    btn.className = 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
     if(textSpan) textSpan.innerText = 'เชื่อมต่อ';
     iconSpan.className = 'fa-solid fa-plug';
     
@@ -34,6 +47,9 @@ function clearApiKey() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // เรียกโหลดฐานข้อมูลทันทีที่เปิดหน้าเว็บ
+    loadLocalDatabase();
+
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
@@ -80,9 +96,9 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** พิมพ์โจทย์ อัปโหลดภาพ/PDF หรือคลิกหัวข้อด้านบนเพื่อเริ่มติวได้เลยครับ');
+        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนชั้นกลาง 2 อย่างถูกต้องและครบถ้วนที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
     } else {
-        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-red-600');
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
         if(textSpan) textSpan.innerText = 'คีย์ผิดพลาด';
         iconSpan.className = 'fa-solid fa-xmark';
@@ -224,9 +240,13 @@ async function handleChatSubmit(e) {
         });
     }
 
-    contentParts.push({ 
-        text: query ? query : "โปรดช่วยวิเคราะห์และแสดงวิธีทำโจทย์บัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดเป็นขั้นตอน" 
-    });
+    // รวมคำถามของผู้ใช้ เข้ากับเนื้อหาฐานข้อมูลจากไฟล์หลังบ้านแบบเงียบๆ
+    let promptText = query ? query : "โปรดช่วยวิเคราะห์คำนวณและแสดงวิธีทำบันทึกบัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดสมบูรณ์ทุกประการ";
+    if (localDatabaseContent) {
+        promptText += `\\n\\n[DATABASE FOR REFERENCE]:\\n${localDatabaseContent}`;
+    }
+
+    contentParts.push({ text: promptText });
 
     conversationHistory.push({
         role: 'user',
@@ -238,7 +258,6 @@ async function handleChatSubmit(e) {
     }
 
     removeAttachedFile();
-
     const loadingId = appendLoading();
 
     try {
@@ -302,9 +321,15 @@ function appendMessage(role, text) {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full ' + (role === 'user' ? 'flex-row-reverse' : '');
 
+    // ทำความสะอาดส่วนอ้างอิงฐานข้อมูลหลังบ้าน ไม่ให้แสดงบนหน้าจอผู้ใช้
+    let cleanDisplayForm = text;
+    if (cleanDisplayForm.includes('[DATABASE FOR REFERENCE]:')) {
+        cleanDisplayForm = cleanDisplayForm.split('[DATABASE FOR REFERENCE]:')[0].trim();
+    }
+
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = text;
-    const plainText = tempDiv.textContent || tempDiv.innerText || text;
+    tempDiv.innerHTML = cleanDisplayForm;
+    const plainText = tempDiv.textContent || tempDiv.innerText || cleanDisplayForm;
 
     if (role === 'user') {
         msgDiv.innerHTML = `
@@ -312,7 +337,7 @@ function appendMessage(role, text) {
                 <i class="fa-solid fa-user"></i>
             </div>
             <div class="relative group bg-blue-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
-                <span>${escapeHtml(text)}</span>
+                <span>${escapeHtml(cleanDisplayForm)}</span>
                 <button onclick="copyMessageText(this, \`${escapeJsString(plainText)}\`)" title="คัดลอกข้อความ" 
                     class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-blue-700/60 hover:bg-blue-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
                     <i class="fa-regular fa-copy"></i>
@@ -320,14 +345,14 @@ function appendMessage(role, text) {
             </div>
         `;
     } else {
-        const parsedMarkdown = marked.parse(text);
+        const parsedMarkdown = marked.parse(cleanDisplayForm);
         msgDiv.innerHTML = `
             <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
                 <i class="fa-solid fa-robot"></i>
             </div>
-            <div class="relative group bg-white border border-slate-200/80 p-4 md:p-6 rounded-2xl rounded-tl-sm text-xs md:text-[15px] text-slate-700 markdown-body shadow-sm flex-1 overflow-x-auto">
+            <div class="relative group bg-white border border-slate-200/80 p-4 md:p-6 rounded-2xl rounded-tl-sm text-xs md:text-[15px] text-slate-700 markdown-body shadow-xs flex-1 overflow-x-auto">
                 <button onclick="copyMessageText(this, \`${escapeJsString(plainText)}\`)" title="คัดลอกข้อความ" 
-                    class="absolute top-2.5 right-2.5 md:top-3 md:right-3 p-1.5 rounded-lg bg-slate-100 hover:bg-gray-200 text-slate-600 border border-slate-200 opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
+                    class="absolute top-2.5 right-2.5 md:top-3 md:right-3 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
                     <i class="fa-regular fa-copy"></i>
                 </button>
                 ${parsedMarkdown}
