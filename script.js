@@ -37,12 +37,12 @@ function clearApiKey() {
     const textSpan = document.getElementById('keyBtnText');
     const iconSpan = document.getElementById('keyBtnIcon');
     
-    btn.className = 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
-    if(textSpan) textSpan.innerText = 'เชื่อมต่อ Groq';
-    iconSpan.className = 'fa-solid fa-bolt';
+    btn.className = 'bg-green-600 hover:bg-green-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
+    if(textSpan) textSpan.innerText = 'เชื่อมต่อ NVIDIA';
+    iconSpan.className = 'fa-solid fa-microchip';
     
     isApiConnected = false;
-    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล Groq API Key เรียบร้อยแล้ว');
+    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล NVIDIA API Key เรียบร้อยแล้ว');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -51,16 +51,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
-            const helpMsg = '⚠️ หากยังไม่ได้รับ Groq API Key สามารถสมัครรับคีย์ฟรีได้ที่ [console.groq.com](https://console.groq.com) หรือติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
+            const helpMsg = '⚠️ หากยังไม่ได้รับ NVIDIA API Key สามารถรับคีย์ฟรีได้ที่ [build.nvidia.com](https://build.nvidia.com) หรือติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
             appendMessage('ai', helpMsg);
         }
     }, 10000);
 });
 
-// ฟังก์ชันตรวจสอบความถูกต้องของ Groq API Key
+// ฟังก์ชันตรวจสอบความถูกต้องของ NVIDIA API Key
 async function verifyApiKey(key) {
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/models', {
+        const response = await fetch('https://integrate.api.nvidia.com/v1/models', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${key.trim()}`
@@ -80,7 +80,7 @@ async function verifyAndSaveKey() {
     const key = keyInput.value.trim();
 
     if (!key) {
-        appendMessage('ai', '⚠️ กรุณาวาง Groq API Key (เริ่มต้นด้วย gsk_...) ก่อนกดเชื่อมต่อครับ');
+        appendMessage('ai', '⚠️ กรุณาวาง NVIDIA API Key (เริ่มต้นด้วย nvapi-...) ก่อนกดเชื่อมต่อครับ');
         keyInput.focus();
         return;
     }
@@ -95,19 +95,19 @@ async function verifyAndSaveKey() {
         isApiConnected = true;
         if (apiTimeout) clearTimeout(apiTimeout);
         
-        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-500', 'hover:bg-red-600');
+        btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-red-500', 'hover:bg-red-600');
         btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-        if(textSpan) textSpan.innerText = 'Groq พร้อมใช้';
+        if(textSpan) textSpan.innerText = 'NVIDIA พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยระบบ groq/compound พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ NVIDIA NIM สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล meta/llama-3.1-70b-instruct พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
     } else {
-        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
+        btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
         if(textSpan) textSpan.innerText = 'คีย์ผิดพลาด';
         iconSpan.className = 'fa-solid fa-xmark';
         
-        appendMessage('ai', '❌ **ข้อผิดพลาด:** Groq API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์อีกครั้งครับ');
+        appendMessage('ai', '❌ **ข้อผิดพลาด:** NVIDIA API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์ (nvapi-...) อีกครั้งครับ');
     }
     btn.disabled = false;
 }
@@ -188,7 +188,7 @@ async function handleChatSubmit(e) {
     if (!query) return;
 
     if (!apiKey) {
-        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ Groq API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ Groq" ก่อนนะครับ');
+        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ NVIDIA API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ NVIDIA" ก่อนนะครับ');
         apiKeyInputEl.focus();
         return;
     }
@@ -210,8 +210,8 @@ async function handleChatSubmit(e) {
 
     const loadingId = appendLoading();
 
-    // บังคับล็อกใช้งานโมเดล groq/compound
-    const targetModel = 'groq/compound';
+    // ล็อกใช้งานโมเดลของ NVIDIA NIM
+    const targetModel = 'meta/llama-3.1-70b-instruct';
 
     try {
         const requestMessages = [
@@ -219,7 +219,8 @@ async function handleChatSubmit(e) {
             ...conversationHistory
         ];
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        // ยิง Request ไปที่เซิร์ฟเวอร์ NVIDIA
+        const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -235,7 +236,7 @@ async function handleChatSubmit(e) {
 
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์การใช้งานโมเดลนี้`);
+            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} บนเซิร์ฟเวอร์ NVIDIA ได้ กรุณาตรวจสอบ API Key หรือโควตาการใช้งาน`);
         }
 
         const data = await response.json();
@@ -282,13 +283,13 @@ function appendMessage(role, text) {
 
     if (role === 'user') {
         msgDiv.innerHTML = `
-            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs border border-blue-200">
+            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs border border-green-200">
                 <i class="fa-solid fa-user"></i>
             </div>
-            <div class="relative group bg-blue-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
+            <div class="relative group bg-green-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
                 <span>${escapeHtml(text)}</span>
                 <button onclick="copyMessageText(this, \`${escapeJsString(plainText)}\`)" title="คัดลอกข้อความ" 
-                    class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-blue-700/60 hover:bg-blue-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
+                    class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-green-700/60 hover:bg-green-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
                     <i class="fa-regular fa-copy"></i>
                 </button>
             </div>
@@ -296,7 +297,7 @@ function appendMessage(role, text) {
     } else {
         const parsedMarkdown = marked.parse(text);
         msgDiv.innerHTML = `
-            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
+            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-green-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
                 <i class="fa-solid fa-robot"></i>
             </div>
             <div class="relative group bg-white border border-slate-200/80 p-4 md:p-6 rounded-2xl rounded-tl-sm text-xs md:text-[15px] text-slate-700 markdown-body shadow-xs flex-1 overflow-x-auto">
@@ -324,12 +325,12 @@ function appendLoading() {
     loadingDiv.id = id;
     loadingDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full';
     loadingDiv.innerHTML = `
-        <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
-            <i class="fa-solid fa-bolt text-amber-500 animate-pulse"></i>
+        <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-green-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
+            <i class="fa-solid fa-microchip animate-pulse"></i>
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
-            <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>groq/compound กำลังวิเคราะห์และประมวลผลคำตอบ...</span>
+            <div class="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin"></div>
+            <span>NVIDIA NIM กำลังประมวลผลคำตอบ...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
