@@ -14,9 +14,10 @@ let conversationHistory = [];
 let isApiConnected = false;
 let apiTimerTriggered = false;
 let apiTimeout = null;
+let attachedFile = null;
 let localDatabaseContent = ""; 
 
-// ฟังก์ชันโหลดฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
+// โหลดฐานข้อมูลจากไฟล์ dataset.txt อัตโนมัติหลังบ้าน
 async function loadLocalDatabase() {
     try {
         const response = await fetch('dataset.txt');
@@ -37,12 +38,12 @@ function clearApiKey() {
     const textSpan = document.getElementById('keyBtnText');
     const iconSpan = document.getElementById('keyBtnIcon');
     
-    btn.className = 'bg-green-600 hover:bg-green-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
-    if(textSpan) textSpan.innerText = 'เชื่อมต่อ NVIDIA';
-    iconSpan.className = 'fa-solid fa-microchip';
+    btn.className = 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer';
+    if(textSpan) textSpan.innerText = 'เชื่อมต่อ Gemini';
+    iconSpan.className = 'fa-solid fa-plug';
     
     isApiConnected = false;
-    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล NVIDIA API Key เรียบร้อยแล้ว');
+    alert('ระบบได้ทำการยกเลิกการเชื่อมต่อและลบข้อมูล API Key ของท่านเรียบร้อยแล้ว');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -51,21 +52,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     apiTimeout = setTimeout(() => {
         if (!isApiConnected && !apiTimerTriggered) {
             apiTimerTriggered = true;
-            const helpMsg = '⚠️ หากยังไม่ได้รับ NVIDIA API Key สามารถรับคีย์ฟรีได้ที่ [build.nvidia.com](https://build.nvidia.com) หรือติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
+            const helpMsg = '⚠️ หากยังไม่ได้รับ Google API Key โปรดติดต่อผู้ดูแลระบบครับ<br><br><a href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 39, 67, 0.3); transition: transform 0.2s;"><i class="fa-brands fa-instagram text-lg"></i> ติดต่อผู้ดูแลระบบ (IG: porumors)</a>';
             appendMessage('ai', helpMsg);
         }
     }, 10000);
 });
 
-// ฟังก์ชันตรวจสอบความถูกต้องของ NVIDIA API Key
+// ตรวจสอบ Google Gemini API Key
 async function verifyApiKey(key) {
     try {
-        const response = await fetch('https://integrate.api.nvidia.com/v1/models', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${key.trim()}`
-            }
-        });
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
         return response.ok;
     } catch (e) {
         return false;
@@ -80,7 +76,7 @@ async function verifyAndSaveKey() {
     const key = keyInput.value.trim();
 
     if (!key) {
-        appendMessage('ai', '⚠️ กรุณาวาง NVIDIA API Key (เริ่มต้นด้วย nvapi-...) ก่อนกดเชื่อมต่อครับ');
+        appendMessage('ai', '⚠️ กรุณาวาง API Key ก่อนกดเชื่อมต่อครับ');
         keyInput.focus();
         return;
     }
@@ -95,21 +91,52 @@ async function verifyAndSaveKey() {
         isApiConnected = true;
         if (apiTimeout) clearTimeout(apiTimeout);
         
-        btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-red-500', 'hover:bg-red-600');
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-500', 'hover:bg-red-600');
         btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-        if(textSpan) textSpan.innerText = 'NVIDIA พร้อมใช้';
+        if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ NVIDIA NIM สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
+        appendMessage('ai', '✅ **ระบบเชื่อมต่อ Google Gemini API สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนอย่างถูกต้องที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
     } else {
-        btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-emerald-500', 'hover:bg-emerald-600');
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
         if(textSpan) textSpan.innerText = 'คีย์ผิดพลาด';
         iconSpan.className = 'fa-solid fa-xmark';
         
-        appendMessage('ai', '❌ **ข้อผิดพลาด:** NVIDIA API Key ไม่ถูกต้อง กรุณาตรวจสอบคีย์ (nvapi-...) อีกครั้งครับ');
+        appendMessage('ai', '❌ **ข้อผิดพลาด:** สิทธิ์การเข้าถึงระบบไม่ถูกต้อง กรุณาตรวจสอบความถูกต้องของ API Key อีกครั้งครับ');
     }
     btn.disabled = false;
+}
+
+function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+        alert('กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ (JPG, PNG) หรือไฟล์ PDF เท่านั้นครับ');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64String = e.target.result.split(',')[1];
+        attachedFile = {
+            mimeType: file.type,
+            data: base64String,
+            name: file.name
+        };
+
+        document.getElementById('fileNameDisplay').textContent = file.name;
+        document.getElementById('filePreviewContainer').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeAttachedFile() {
+    attachedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreviewContainer').classList.add('hidden');
 }
 
 let recognition = null;
@@ -185,70 +212,104 @@ async function handleChatSubmit(e) {
     const apiKeyInputEl = document.getElementById('manualApiKey');
     let apiKey = apiKeyInputEl.value.trim();
 
-    if (!query) return;
+    if (!query && !attachedFile) return;
 
     if (!apiKey) {
-        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ NVIDIA API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ NVIDIA" ก่อนนะครับ');
+        appendMessage('ai', '⚠️ คุณยังไม่ได้เชื่อมต่อ API Key ครับ กรุณาวางคีย์ที่มุมขวาบนแล้วกด "เชื่อมต่อ Gemini" ก่อนส่งข้อความนะครับ');
         apiKeyInputEl.focus();
         return;
     }
 
-    appendMessage('user', query);
+    let displayMessage = query;
+    if (attachedFile) {
+        displayMessage = query ? `${query} (แนบไฟล์: ${attachedFile.name})` : `[แนบไฟล์: ${attachedFile.name}]`;
+    }
+    appendMessage('user', displayMessage);
 
     inputEl.value = '';
     inputEl.blur();
     btnEl.disabled = true;
 
-    conversationHistory.push({
-        role: 'user',
-        content: query
-    });
-
-    if (conversationHistory.length > 10) {
-        conversationHistory = conversationHistory.slice(-10);
+    // โครงสร้าง Payload สำหรับ Google Gemini
+    const contentParts = [];
+    if (attachedFile) {
+        contentParts.push({
+            inlineData: {
+                mimeType: attachedFile.mimeType,
+                data: attachedFile.data
+            }
+        });
     }
 
+    let promptText = query ? query : "โปรดช่วยวิเคราะห์คำนวณและแสดงวิธีทำบันทึกบัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดสมบูรณ์ทุกประการ";
+    if (localDatabaseContent) {
+        promptText += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
+    }
+
+    contentParts.push({ text: promptText });
+
+    conversationHistory.push({
+        role: 'user',
+        parts: contentParts
+    });
+
+    if (conversationHistory.length > 16) {
+        conversationHistory = conversationHistory.slice(-16);
+    }
+
+    removeAttachedFile();
     const loadingId = appendLoading();
 
-    // กำหนดโมเดลตามที่ผู้ใช้ระบุในโค้ด Python
-    const targetModel = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
-
     try {
-        const requestMessages = [
-            { role: 'system', content: SYSTEM_INSTRUCTION },
-            ...conversationHistory
+        const requestBody = {
+            contents: conversationHistory,
+            systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+            generationConfig: { 
+                temperature: 0.1,      
+                maxOutputTokens: 8192  
+            }
+        };
+
+        // ระบบ Auto-Fallback วิ่งหาโมเดล Gemini ที่พร้อมใช้งาน ป้องกันเว็บล่ม 100%
+        const geminiModels = [
+            'gemini-1.5-flash',
+            'gemini-2.0-flash-exp',
+            'gemini-1.5-pro'
         ];
 
-        // ยิง Request ไปที่เซิร์ฟเวอร์ NVIDIA โดยใส่ Config ตามที่ระบุมาเป๊ะๆ
-        const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                prompt: "", // ใส่พารามิเตอร์ prompt เปล่าตามโครงสร้าง Python ที่ให้มา
-                model: targetModel,
-                messages: requestMessages,
-                max_tokens: 65536,
-                reasoning_budget: 16384,
-                temperature: 0.6,
-                top_p: 0.95
-            })
-        });
+        let response = null;
+        let data = null;
+        let success = false;
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error?.message || `ไม่สามารถเรียกใช้งานโมเดล ${targetModel} ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์ของโมเดล`);
+        for (const model of geminiModels) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            try {
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (response.ok) {
+                    data = await response.json();
+                    success = true;
+                    console.log(`Successfully generated using Gemini model: ${model}`);
+                    break;
+                }
+            } catch (err) {
+                console.warn(`Gemini model ${model} failed. Trying next...`);
+            }
         }
 
-        const data = await response.json();
-        const aiResponseText = data.choices?.[0]?.message?.content || 'ไม่สามารถประมวลผลคำตอบได้';
+        if (!success || !data) {
+            throw new Error("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อกับ Google Gemini ได้ในขณะนี้ กรุณาตรวจสอบ API Key หรือลองใหม่อีกครั้ง");
+        }
+
+        const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่สามารถประมวลผลคำตอบได้';
 
         conversationHistory.push({
-            role: 'assistant',
-            content: aiResponseText
+            role: 'model',
+            parts: [{ text: aiResponseText }]
         });
 
         removeLoading(loadingId);
@@ -281,27 +342,32 @@ function appendMessage(role, text) {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full ' + (role === 'user' ? 'flex-row-reverse' : '');
 
+    let cleanDisplayForm = text;
+    if (cleanDisplayForm.includes('[DATABASE FOR REFERENCE]:')) {
+        cleanDisplayForm = cleanDisplayForm.split('[DATABASE FOR REFERENCE]:')[0].trim();
+    }
+
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = text;
-    const plainText = tempDiv.textContent || tempDiv.innerText || text;
+    tempDiv.innerHTML = cleanDisplayForm;
+    const plainText = tempDiv.textContent || tempDiv.innerText || cleanDisplayForm;
 
     if (role === 'user') {
         msgDiv.innerHTML = `
-            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs border border-green-200">
+            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs border border-blue-200">
                 <i class="fa-solid fa-user"></i>
             </div>
-            <div class="relative group bg-green-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
-                <span>${escapeHtml(text)}</span>
+            <div class="relative group bg-blue-600 text-white px-4 md:px-5 py-3 md:py-3.5 rounded-2xl rounded-tr-sm text-xs md:text-[15px] max-w-[85%] md:max-w-2xl shadow-xs leading-relaxed pr-9 md:pr-10">
+                <span>${escapeHtml(cleanDisplayForm)}</span>
                 <button onclick="copyMessageText(this, \`${escapeJsString(plainText)}\`)" title="คัดลอกข้อความ" 
-                    class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-green-700/60 hover:bg-green-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
+                    class="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 p-1.5 rounded-lg bg-blue-700/60 hover:bg-blue-700 text-white opacity-70 group-hover:opacity-100 transition-all text-xs cursor-pointer">
                     <i class="fa-regular fa-copy"></i>
                 </button>
             </div>
         `;
     } else {
-        const parsedMarkdown = marked.parse(text);
+        const parsedMarkdown = marked.parse(cleanDisplayForm);
         msgDiv.innerHTML = `
-            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-green-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
+            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
                 <i class="fa-solid fa-robot"></i>
             </div>
             <div class="relative group bg-white border border-slate-200/80 p-4 md:p-6 rounded-2xl rounded-tl-sm text-xs md:text-[15px] text-slate-700 markdown-body shadow-xs flex-1 overflow-x-auto">
@@ -329,12 +395,12 @@ function appendLoading() {
     loadingDiv.id = id;
     loadingDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full';
     loadingDiv.innerHTML = `
-        <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-green-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
-            <i class="fa-solid fa-microchip animate-pulse"></i>
+        <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0 text-xs md:text-sm shadow-xs">
+            <i class="fa-solid fa-robot animate-pulse"></i>
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
-            <div class="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin"></div>
-            <span>nemotron-3-nano กำลังใช้เหตุผลวิเคราะห์คำตอบอย่างละเอียด...</span>
+            <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
+            <span>Google Gemini กำลังวิเคราะห์และประมวลผลคำตอบ...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
