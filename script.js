@@ -1,14 +1,14 @@
-const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย
-หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ และข้อมูลจากไฟล์ฐานข้อมูลหนังสือเรียนการบัญชีชั้นกลาง 2 (ที่ระบบแนบไปให้ในหัวข้อ DATABASE) เป็นหลักเท่านั้น
+const SYSTEM_INSTRUCTION = `คุณคือ AccuMate AI ผู้เชี่ยวชาญด้านบัญชีระดับมหาวิทยาลัย (เน้นวิชาการบัญชีชั้นกลาง 2 บทที่ 1 หนี้สินหมุนเวียน และ บทที่ 2 หนี้สินไม่หมุนเวียนและหนี้สินที่อาจเกิดขึ้น)
+หน้าที่ของคุณคือการตอบคำถาม อธิบายเนื้อหา และแสดงวิธีทำโจทย์บัญชีให้กับนักศึกษา โดยต้องยึดหลักการ ตรรกะ วิธีคำนวณ และการบันทึกบัญชีตามคู่มือเรียนการบัญชีชั้นกลาง 2 (TFRS 9, TFRS 15, TAS 1, TAS 32, TAS 37) ที่อยู่ในไฟล์ฐานข้อมูล DATABASE เป็นหลักเท่านั้น
 
-กฎการคำนวณและตรรกะสูงสุด (Strict Rules - ห้ามฝ่าฝืนหรือพลาดเด็ดขาด):
+กฎเหล็กด้านตรรกะและการคำนวณ (Strict Rules - ห้ามฝ่าฝืนหรือพลาดเด็ดขาด):
 1. **ใช้ตัวเลขตามโจทย์เท่านั้น:** ห้ามคิดตัวเลขขึ้นมาเอง ห้ามสมมติฐาน หรืออ้างอิงตัวเลขอื่นที่นอกเหนือจากโจทย์ระบุเด็ดขาด
 2. **การใช้ค่าคิดลดในตาราง:** ทุกการคำนวณมูลค่าปัจจุบัน (Present Value) ของหุ้นกู้, ตั๋วเงินจ่าย หรือเงินกู้ยืม ต้องอ้างอิงและใช้ค่าจากตาราง PVIF และ PVIFA แบบ **ทศนิยม 5 ตำแหน่ง เท่านั้น**
 3. **หลักการปัดเศษทศนิยม:** ผลลัพธ์การคำนวณหรือตัวเลขในตารางตัดบัญชีทุกขั้นตอน หากเศษทศนิยมมีค่า **ตั้งแต่ 0.5 ขึ้นไป ให้ปัดขึ้น** หากเศษทศนิยมมีค่า **ต่ำกว่า 0.5 ให้ปัดลง** เสมอ
-4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของตามที่มีใน DATABASE เท่านั้น หากนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
+4. ขอบเขตเนื้อหา: ตอบเฉพาะคำถามที่เกี่ยวกับวิชาการบัญชีหนี้สินและส่วนของเจ้าของเท่านั้น หากผู้ใช้ถามเรื่องนอกเหนือจากนี้ ให้ปฏิเสธอย่างสุภาพทันที
 5. ตอบให้ละเอียดครบถ้วนทุกประเด็น **ห้ามตัดบท ห้ามสรุปย่อหรือละเว้นขั้นตอนสำคัญ** ต้องแสดงสูตร ที่มาของตัวเลข และแจกแจงวิธีคิดทีละ Step ตั้งแต่ต้นจนจบอย่างสมบูรณ์
 6. การบันทึกสมุดรายวันทั่วไป **ต้องตีตาราง Markdown เสมอ** ให้มีคอลัมน์: วันเดือนปี | รายการ | เลขที่บัญชี | เดบิต | เครดิต (ในคอลัมน์รายการ สำหรับชื่อบัญชีฝั่งเครดิต ให้พิมพ์ &nbsp;&nbsp;&nbsp;&nbsp; นำหน้าชื่อบัญชี เพื่อเยื้องขวาให้ถูกต้องสวยงามตามหลักบัญชีจริง)
-7. ห้ามใช้โค้ด LaTeX เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
+7. ห้ามใช้โค้ด LaTeX (เช่น $$, \\\\mathbf, \\\\text) เด็ดขาด ให้ใช้ข้อความธรรมดา เครื่องหมายคณิตศาสตร์ปกติ (+, -, *, /) และใช้ Markdown ทั่วไป เช่น **ตัวหนา** เท่านั้น`;
 
 let conversationHistory = [];
 let isApiConnected = false;
@@ -47,7 +47,7 @@ function clearApiKey() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // เรียกโหลดฐานข้อมูลทันทีที่เปิดหน้าเว็บ
+    // โหลดไฟล์ dataset.txt ทันทีที่เปิดหน้าเว็บ
     loadLocalDatabase();
 
     apiTimeout = setTimeout(() => {
@@ -96,7 +96,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'พร้อมใช้งาน';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** ตอนนี้ผมพร้อมตอบคำถาม บันทึกบัญชี และคำนวณโจทย์วิเคราะห์ตามฐานข้อมูลหนังสือเรียนชั้นกลาง 2 อย่างถูกต้องและครบถ้วนที่สุดแล้ว พิมพ์คำถามหรือส่งไฟล์ภาพ/PDF เข้ามาได้เลยครับ');
+        appendMessage('ai', '✅ **ระบบเชื่อมต่อ API Key สำเร็จเรียบร้อยแล้วครับ!** พิมพ์โจทย์ อัปโหลดภาพ/PDF หรือคลิกหัวข้อด้านบนเพื่อเริ่มติวได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -240,10 +240,10 @@ async function handleChatSubmit(e) {
         });
     }
 
-    // รวมคำถามของผู้ใช้ เข้ากับเนื้อหาฐานข้อมูลจากไฟล์หลังบ้านแบบเงียบๆ
+    // รวมคำถามของผู้ใช้ เข้ากับเนื้อหาฐานข้อมูลจากไฟล์ dataset.txt หลังบ้าน
     let promptText = query ? query : "โปรดช่วยวิเคราะห์คำนวณและแสดงวิธีทำบันทึกบัญชีจากไฟล์ที่อัปโหลดนี้อย่างละเอียดสมบูรณ์ทุกประการ";
     if (localDatabaseContent) {
-        promptText += `\\n\\n[DATABASE FOR REFERENCE]:\\n${localDatabaseContent}`;
+        promptText += `\n\n[DATABASE FOR REFERENCE]:\n${localDatabaseContent}`;
     }
 
     contentParts.push({ text: promptText });
@@ -261,7 +261,8 @@ async function handleChatSubmit(e) {
     const loadingId = appendLoading();
 
     try {
-        const modelName = 'gemini-3-flash-preview';
+        // บังคับล็อกเฉพาะโมเดล gemini-3.5-flash-lite เท่านั้น
+        const modelName = 'gemini-3.5-flash-lite';
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
         const requestBody = {
@@ -273,6 +274,7 @@ async function handleChatSubmit(e) {
             }
         };
 
+        // ยิงคำสั่งไปยัง gemini-3.5-flash-lite โดยตรง (ไม่มีระบบสลับโมเดล)
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -280,7 +282,7 @@ async function handleChatSubmit(e) {
         });
 
         if (!response.ok) {
-            throw new Error("ข้อผิดพลาด: สิทธิ์การเข้าถึงระบบไม่ถูกต้อง หรือโมเดล gemini-3-flash-preview อาจยังไม่เปิดให้บริการบนคีย์นี้ กรุณาตรวจสอบ API Key อีกครั้ง");
+            throw new Error("ข้อผิดพลาด: ไม่สามารถเรียกใช้งานโมเดล gemini-3.5-flash-lite ได้ กรุณาตรวจสอบความถูกต้องของ API Key หรือสิทธิ์การเข้าถึงโมเดลนี้อีกครั้ง");
         }
 
         const data = await response.json();
@@ -321,7 +323,6 @@ function appendMessage(role, text) {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'flex gap-3 md:gap-4 max-w-5xl mx-auto w-full ' + (role === 'user' ? 'flex-row-reverse' : '');
 
-    // ทำความสะอาดส่วนอ้างอิงฐานข้อมูลหลังบ้าน ไม่ให้แสดงบนหน้าจอผู้ใช้
     let cleanDisplayForm = text;
     if (cleanDisplayForm.includes('[DATABASE FOR REFERENCE]:')) {
         cleanDisplayForm = cleanDisplayForm.split('[DATABASE FOR REFERENCE]:')[0].trim();
@@ -380,7 +381,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>กำลังคิดคำนวณตามหลักการบัญชีอย่างละเอียดถี่ถ้วน...</span>
+            <span>กำลังคิดวิเคราะห์คำนวณและประมวลผลตามหลักการบัญชีอย่างรายละเอียด...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
