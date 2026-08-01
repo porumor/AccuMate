@@ -100,7 +100,7 @@ async function verifyAndSaveKey() {
         if(textSpan) textSpan.innerText = 'Groq พร้อมใช้';
         iconSpan.className = 'fa-solid fa-check-circle';
         
-        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยโมเดล llama-3.3-70b-versatile พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
+        appendMessage('ai', '⚡ **ระบบเชื่อมต่อ Groq API สำเร็จเรียบร้อยแล้ว!** ล็อกการทำงานด้วยระบบ groq/compound พิมพ์โจทย์คำถามเข้ามาได้เลยครับ');
     } else {
         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-500', 'hover:bg-emerald-600');
         btn.classList.add('bg-red-500', 'hover:bg-red-600');
@@ -210,8 +210,8 @@ async function handleChatSubmit(e) {
 
     const loadingId = appendLoading();
 
-    // ล็อกใช้งานโมเดล llama-3.3-70b-versatile
-    const targetModel = 'llama-3.3-70b-versatile';
+    // บังคับล็อกใช้งานโมเดล groq/compound
+    const targetModel = 'groq/compound';
 
     try {
         const requestMessages = [
@@ -329,7 +329,7 @@ function appendLoading() {
         </div>
         <div class="bg-white border border-slate-200/80 p-3.5 md:p-4 rounded-2xl rounded-tl-sm text-xs md:text-sm text-slate-500 flex items-center gap-3 shadow-xs">
             <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-            <span>llama-3.3-70b-versatile กำลังคิดวิเคราะห์และตอบกลับอย่างรวดเร็ว...</span>
+            <span>groq/compound กำลังวิเคราะห์และประมวลผลคำตอบ...</span>
         </div>
     `;
     chatHistory.appendChild(loadingDiv);
