@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AccuMate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- PDF.js สำหรับอ่านไฟล์ PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- Marked.js & DOMPurify สำหรับแปลง Markdown และ ตารางให้สวยงาม -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+  <!-- KaTeX สำหรับเรนเดอร์สมการคณิตศาสตร์ -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    button, a, input, select, textarea {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    button:focus, input:focus, select:focus {
+      outline: none !important;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    body {
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #ffffff 50%, #dbeafe 100%);
+      z-index: -1;
+      opacity: 1;
+      transition: opacity 3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      pointer-events: none;
+    }
+
+    body.chat-active::before {
+      opacity: 0;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: transparent;
+      z-index: 100;
+      position: relative;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .header-logo-svg {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+      .custom-dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-trigger-btn {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+      background: rgba(241, 245, 249, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      outline: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .dropdown-trigger-btn:hover {
+      background: rgba(241, 245, 249, 1);
+    }
+
+    .dropdown-arrow {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+
+    .custom-dropdown-container.open .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu-card {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: min(240px, 80vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px) scale(0.95);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+      transform-origin: top left;
+    }
+
+    .custom-dropdown-container.open .dropdown-menu-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .demo-dropdown-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .demo-text-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #2563eb;
+      background: none;
+      border: none;
+      padding: 4px 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .demo-text-btn:hover {
+      opacity: 0.8;
+    }
+
+    .demo-menu-card {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      left: auto;
+      width: min(260px, 85vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px) scale(0.95);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+      transform-origin: top right;
+    }
+
+    .demo-dropdown-wrap.open .demo-menu-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .demo-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-desc {
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .developer-section {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 6px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dev-label {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .ig-link {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 8px;
+      border-radius: 10px;
+      color: #0f172a;
+      font-size: 11.5px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .ig-link:hover {
+      background: #f1f5f9;
+    }
+
+    .ig-link svg {
+      width: 13px;
+      height: 13px;
+      fill: #e1306c;
+    }
+
+    .dropdown-option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown-option-item:hover {
+      background: #f8fafc;
+    }
+
+    .option-check {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      visibility: hidden;
+      color: #0f172a;
+    }
+
+    .dropdown-option-item.selected .option-check {
+      visibility: visible;
+    }
+
+    .option-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .option-header-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .option-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .new-badge {
+      font-size: 9.5px;
+      font-weight: 400;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 8px;
+    }
+
+    .option-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 1px;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      min-height: 0;
+    }
+
+    .welcome-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+      animation: fadeIn 0.5s ease;
+      margin: auto 0;
+    }
+
+    .hero-logo-svg {
+      width: 56px;
+      height: 56px;
+      color: #1a1d20;
+    }
+
+    .welcome-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #475569;
+      transition: opacity 0.3s ease;
+      padding: 0 10px;
+    }
+
+    .chat-stream {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 60px;
+    }
+
+    .message-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 12px;
+      animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes messageSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-container.user {
+      align-items: flex-end;
+    }
+
+    .message-container.bot {
+      align-items: flex-start;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .message.user {
+      max-width: 85%;
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+
+    .message.bot {
+      width: 100%;
+      max-width: 100%;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 4px 0 !important;
+      color: #0f172a;
+    }
+
+    .copy-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #64748b;
+      font-size: 11.5px;
+      font-weight: 400;
+      padding: 4px 6px;
+      margin-top: 4px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+    }
+
+    .copy-action-btn.show {
+      opacity: 0.6;
+      transform: translateY(0);
+    }
+
+    .copy-action-btn:hover {
+      opacity: 1;
+      color: #0f172a;
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .bot-content p { margin-bottom: 10px; }
+    .bot-content p:last-child { margin-bottom: 0; }
+    .bot-content ul, .bot-content ol { margin: 8px 0 12px 20px; }
+    .bot-content li { margin-bottom: 4px; }
+    .bot-content h1, .bot-content h2, .bot-content h3 { margin: 14px 0 8px 0; font-weight: 500; color: #0f172a; }
+    .bot-content h1 { font-size: 17px; }
+    .bot-content h2 { font-size: 15px; }
+    .bot-content h3 { font-size: 14px; }
+
+    .table-container {
+      position: relative;
+      margin: 12px 0;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .bot-content table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    .bot-content th, .bot-content td {
+      white-space: nowrap !important;
+      padding: 8px 14px;
+      font-size: 13.5px;
+    }
+
+    .bot-content th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 500;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .bot-content td {
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+
+    .bot-content tr:nth-child(even) td { background: #fafafa; }
+
+    .file-attachment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .loader {
+      width: 65px;
+      height: 30px;
+      position: relative;
+      margin: 4px 0;
+    }
+    .loader:before {
+      content: "";
+      position: absolute;
+      border-radius: 50px;
+      box-shadow: 0 0 0 3px inset #0f172a;
+      animation: l3 0.75s infinite alternate;
+    }
+    @keyframes l3 {
+      0% { inset: 0 35px 0 0; }
+      50% { inset: 0 0 0 0; }
+      100% { inset: 0 0 0 35px; }
+    }
+
+    .bottom-container {
+      padding: 8px 16px calc(8px + env(safe-area-inset-bottom)) 16px;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .copyright-footer {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      padding-top: 4px;
+      width: 100%;
+      letter-spacing: 0.2px;
+    }
+
+    .file-preview-card {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 20px;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      animation: fadeIn 0.25s ease;
+    }
+
+    .preview-thumbnail-wrap {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-thumbnail-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-file-icon {
+      color: #ef4444;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-preview-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      max-width: 180px;
+    }
+
+    .file-preview-name {
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-preview-size {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .remove-file-btn {
+      border: none;
+      background: rgba(0, 0, 0, 0.08);
+      color: #334155;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+
+    .remove-file-btn:hover {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .image-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .image-modal-overlay.open { display: flex; }
+    .image-modal-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+    .image-modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+    .close-modal-btn {
+      position: absolute;
+      top: -40px; right: 0;
+      background: none; border: none; color: #ffffff;
+      font-size: 28px; cursor: pointer; padding: 4px;
+    }
+
+    .input-capsule {
+      background: #ffffff;
+      border-radius: 30px;
+      padding: 6px 10px 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .add-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #475569;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .input-capsule input[type="text"] {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: transparent;
+      color: #1e293b;
+      min-width: 0;
+    }
+
+    .input-capsule input::placeholder { color: #64748b; }
+
+    .action-icons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .mic-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #1e293b;
+      transition: all 0.3s ease;
+    }
+
+    .mic-btn.listening {
+      background: #ef4444 !important;
+      color: #ffffff !important;
+      animation: pulseMic 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseMic {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .send-rocket-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s ease, transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
+
+    .icon-wrapper {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-rocket-btn #rocketIcon,
+    .send-rocket-btn #stopIcon {
+      position: absolute;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      display: block;
+    }
+
+    .send-rocket-btn #rocketIcon {
+      opacity: 1;
+      transform: scale(1) rotate(0deg) translate(-1px, 1px);
+    }
+
+    .send-rocket-btn #stopIcon {
+      opacity: 0;
+      transform: scale(0) rotate(-180deg);
+    }
+
+    .send-rocket-btn.stop-btn #rocketIcon {
+      opacity: 0 !important;
+      transform: scale(0) rotate(180deg) translate(-1px, 1px) !important;
+    }
+
+    .send-rocket-btn.stop-btn #stopIcon {
+      opacity: 1 !important;
+      transform: scale(1) rotate(0deg) !important;
+    }
+
+    .typing-cursor::after {
+      content: '▋';
+      display: inline-block;
+      animation: blink 0.8s infinite;
+      color: #2563eb;
+      margin-left: 2px;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+    <!-- Top Header Bar -->
+  <div class="top-header">
+    <div class="header-left">
+      <div class="header-logo-svg">
+        <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z" fill="#1a1d20"/>
+          <path d="M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z" fill="#1a1d20"/>
+        </svg>
+      </div>
+
+      <span class="brand-title">AccuMate</span>
+
+      <!-- Custom Dropdown Selector -->
+      <div class="custom-dropdown-container" id="modelDropdown">
+        <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
+          <span id="selectedModelLabel">AccuMate Alpha</span>
+          <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <div class="dropdown-menu-card">
+          <div class="dropdown-option-item selected" onclick="selectModel('claude-sonnet-5', 'AccuMate Alpha', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">AccuMate Alpha</span></div>
+              <span class="option-desc">สมดุลและแม่นยำที่สุด</span>
+            </div>
+          </div>
+
+          <div class="dropdown-option-item" onclick="selectModel('claude-fable-5', 'AccuMate Flash', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">AccuMate Flash</span><span class="new-badge">ไวพิเศษ</span></div>
+              <span class="option-desc">รวดเร็ว งานสร้างสรรค์</span>
+            </div>
+          </div>
+
+          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'AccuMate Ultra', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">AccuMate Ultra</span></div>
+              <span class="option-desc">โจทย์ซับซ้อนและคิดคำนวณขั้นสูง</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Header Actions -->
+    <div class="header-right">
+      <div class="demo-dropdown-wrap" id="demoDropdown">
+        <button class="demo-text-btn" onclick="toggleDemoDropdown(event)">
+          <span>Demo Version</span>
+          <svg class="dropdown-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <div class="demo-menu-card">
+          <div class="demo-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            เกี่ยวกับเวอร์ชันทดลอง
+          </div>
+          <div class="demo-desc">
+            AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
+          </div>
+          
+          <div class="developer-section">
+            <span class="dev-label">ติดต่อผู้พัฒนา:</span>
+            <a class="ig-link" href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              <span>@porumors</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <button class="icon-btn" onclick="startNewChat()" title="เริ่มแชตใหม่">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main App Content -->
+  <div class="main-content" id="mainContent">
+    <div class="welcome-hero" id="welcomeHero">
+      <svg class="hero-logo-svg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z" fill="#1a1d20"/>
+        <path d="M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z" fill="#1a1d20"/>
+      </svg>
+      <h1 class="welcome-title" id="welcomeTitle">เราจะเริ่มจากตรงไหนก่อนดี</h1>
+    </div>
+
+    <div class="chat-stream" id="chatStream" style="display: none;"></div>
+  </div>
+
+  <!-- Modal สำหรับดูรูปพรีวิวขนาดเต็ม -->
+  <div class="image-modal-overlay" id="imageModal" onclick="closeImageModal()">
+    <div class="image-modal-content" onclick="event.stopPropagation()">
+      <button class="close-modal-btn" onclick="closeImageModal()">✕</button>
+      <img id="modalImage" src="" alt="Full Preview">
+    </div>
+  </div>
+
+  <!-- Bottom Floating Capsule -->
+  <div class="bottom-container" id="bottomContainer">
+    <div class="file-preview-card" id="filePreviewCard">
+      <div class="preview-thumbnail-wrap" id="previewThumbnailWrap" onclick="openImageModal()" style="display: none;">
+        <img id="previewImgTag" src="" alt="Thumbnail">
+      </div>
+      <div class="preview-file-icon" id="previewFileIcon" style="display: none;">📄</div>
+      <div class="file-preview-info">
+        <span class="file-preview-name" id="fileNameText">filename.pdf</span>
+        <span class="file-preview-size" id="fileSizeText">0 KB</span>
+      </div>
+      <button class="remove-file-btn" onclick="clearSelectedFile()" title="ลบไฟล์">✕</button>
+    </div>
+
+    <div class="input-capsule">
+      <input type="file" id="fileInput" accept="*/*" style="display: none;" onchange="handleFileSelect(event)" />
+      
+      <button class="add-btn" onclick="openFilePicker()" title="แนบไฟล์หรือรูปภาพ">+</button>
+      
+      <input type="text" id="userInput" placeholder="ถาม Accu" onkeypress="handleKeyPress(event)" />
+      
+      <div class="action-icons">
+        <button class="mic-btn" id="micBtn" onclick="toggleSpeechRecognition()" title="พิมพ์ด้วยเสียง">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        
+        <button class="send-rocket-btn" id="submitBtn" onclick="handleSendOrStop()" title="ส่งข้อความ">
+          <span class="icon-wrapper">
+            <svg id="rocketIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <svg id="stopIcon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- บรรทัดลิขสิทธิ์ภาษาอังกฤษใต้ช่องแชท -->
+    <div class="copyright-footer">
+      © 2026 AccuMate. All rights reserved.
+    </div>
+  </div>
+  <script>
+  const HARDCODED_API_KEY = "ccsk-61e9f0c473d7ea0d14e293bc8c9f70755a1b98cb0f8a11489c13313c2bb68324"; 
+
+  const GREETING_MESSAGES = [
+    "เราจะเริ่มจากตรงไหนก่อนดี",
+    "วันนี้มีอะไรให้ Accu ช่วยไหมครับ",
+    "อยากเรียนรู้ หรืออยากวางแผนอะไรวันนี้ดีครับ",
+    "ต้องการให้ Accu ช่วยเขียนโค้ด หรือคิดไอเดียดีครับ",
+    "มีคำถามอะไรอยากถาม Accu ได้เลยครับ",
+    "พร้อมลุยกันหรือยังครับ วันนี้จะทำอะไรดี",
+    "เล่าให้ฟังได้นะ อยากให้ช่วยเรื่องไหนเป็นพิเศษ",
+    "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
+  ];
+
+  const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. Respond in Thai. 
+  Formatting guidelines:
+  1. Use clean, professional, and well-structured Thai language.
+  2. Format your response cleanly using Standard Markdown.
+  3. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
+  4. Do NOT output raw formatting symbols, broken code tags, or messy markdown. Keep it neat like leading AI assistants (ChatGPT/Claude).`;
+
+  let conversationHistory = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: "คุณคือใคร" },
+    { role: "assistant", content: "สวัสดีครับ ผมชื่อ Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate ครับ ยินดีที่ได้ช่วยเหลือคุณครับ!" }
+  ];
+
+  let selectedFile = null;
+  let currentImagePreviewUrl = null;
+  let isGenerating = false;
+  let currentAbortController = null;
+  let currentSelectedModel = "claude-sonnet-5";
+
+  // 📌 ฟังก์ชันดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
+  document.addEventListener('click', function(event) {
+    const modelDropdown = document.getElementById('modelDropdown');
+    const demoDropdown = document.getElementById('demoDropdown');
+    
+    if (modelDropdown && !modelDropdown.contains(event.target)) {
+      modelDropdown.classList.remove('open');
+    }
+    if (demoDropdown && !demoDropdown.contains(event.target)) {
+      demoDropdown.classList.remove('open');
+    }
+  });
+
+  function toggleModelDropdown(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('modelDropdown');
+    const demoDropdown = document.getElementById('demoDropdown');
+    if (demoDropdown) demoDropdown.classList.remove('open');
+    dropdown.classList.toggle('open');
+  }
+
+  function toggleDemoDropdown(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('modelDropdown');
+    const demoDropdown = document.getElementById('demoDropdown');
+    if (dropdown) dropdown.classList.remove('open');
+    demoDropdown.classList.toggle('open');
+  }
+
+  function selectModel(modelValue, modelDisplay, element) {
+    currentSelectedModel = modelValue;
+    document.getElementById('selectedModelLabel').textContent = modelDisplay;
+    
+    const items = document.querySelectorAll('.dropdown-option-item');
+    items.forEach(item => item.classList.remove('selected'));
+    element.classList.add('selected');
+
+    document.getElementById('modelDropdown').classList.remove('open');
+  }
+
+  let recognition = null;
+  let isListening = false;
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("เบราว์เซอร์นี้ไม่รองรับการพิมพ์ด้วยเสียง");
+      return null;
+    }
+    const rec = new SpeechRecognition();
+    rec.lang = 'th-TH';
+    rec.continuous = false;
+    rec.interimResults = true;
+
+    rec.onstart = () => {
+      isListening = true;
+      const micBtn = document.getElementById('micBtn');
+      if (micBtn) micBtn.classList.add('listening');
+    };
+
+    rec.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      document.getElementById('userInput').value = transcript;
+    };
+
+    rec.onerror = () => { stopSpeechRecognition(); };
+    rec.onend = () => { stopSpeechRecognition(); };
+
+    return rec;
+  }
+
+  function toggleSpeechRecognition() {
+    if (isListening) {
+      stopSpeechRecognition();
+    } else {
+      if (!recognition) recognition = initSpeechRecognition();
+      if (recognition) recognition.start();
+    }
+  }
+
+  function stopSpeechRecognition() {
+    isListening = false;
+    const micBtn = document.getElementById('micBtn');
+    if (micBtn) micBtn.classList.remove('listening');
+    if (recognition) try { recognition.stop(); } catch(e) {}
+  }
+
+  function setRandomGreeting() {
+    const titleEl = document.getElementById('welcomeTitle');
+    titleEl.textContent = GREETING_MESSAGES[Math.floor(Math.random() * GREETING_MESSAGES.length)];
+  }
+
+  window.addEventListener('DOMContentLoaded', setRandomGreeting);
+
+  function openFilePicker() {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.value = '';
+    fileInput.click();
+  }
+
+  async function compressImageFile(file, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      selectedFile = file;
+      document.getElementById('fileNameText').textContent = file.name;
+      document.getElementById('fileSizeText').textContent = (file.size / 1024).toFixed(1) + " KB";
+      
+      const thumbWrap = document.getElementById('previewThumbnailWrap');
+      const fileIcon = document.getElementById('previewFileIcon');
+      const imgTag = document.getElementById('previewImgTag');
+
+      if (file.type.startsWith('image/')) {
+        currentImagePreviewUrl = await compressImageFile(file, 700, 0.65);
+        imgTag.src = currentImagePreviewUrl;
+        thumbWrap.style.display = 'flex';
+        fileIcon.style.display = 'none';
+      } else {
+        currentImagePreviewUrl = null;
+        thumbWrap.style.display = 'none';
+        fileIcon.style.display = 'flex';
+      }
+
+      document.getElementById('filePreviewCard').style.display = 'flex';
+    }
+  }
+
+  function clearSelectedFile() {
+    selectedFile = null;
+    currentImagePreviewUrl = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreviewCard').style.display = 'none';
+  }
+
+  function openImageModal() {
+    if (currentImagePreviewUrl) {
+      document.getElementById('modalImage').src = currentImagePreviewUrl;
+      document.getElementById('imageModal').classList.add('open');
+    }
+  }
+
+  function closeImageModal() {
+    document.getElementById('imageModal').classList.remove('open');
+  }
+
+  function startNewChat() {
+    if (isGenerating && currentAbortController) currentAbortController.abort();
+    stopSpeechRecognition();
+    conversationHistory = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: "คุณคือใคร" },
+      { role: "assistant", content: "สวัสดีครับ ผมชื่อ Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate ครับ ยินดีที่ได้ช่วยเหลือคุณครับ!" }
+    ];
+    clearSelectedFile();
+    const chatStream = document.getElementById('chatStream');
+    chatStream.innerHTML = '';
+    chatStream.style.display = 'none';
+    document.getElementById('mainContent').classList.remove('chat-started');
+    document.body.classList.remove('chat-active');
+    document.getElementById('welcomeHero').style.display = 'flex';
+    setRandomGreeting();
+    setGeneratingState(false);
+  }
+
+  function sanitizeAccuReply(text) {
+    let cleanText = text;
+    if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
+      return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
+    }
+    cleanText = cleanText.replace(/ผมชื่อ\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "ผมชื่อ Accu ครับ");
+    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
+    return cleanText;
+  }
+
+  function enhanceTables(container) {
+    const tables = container.querySelectorAll('table');
+    tables.forEach((table) => {
+      if (table.parentElement.classList.contains('table-container')) return;
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'table-container';
+      table.parentNode.insertBefore(containerDiv, table);
+      containerDiv.appendChild(table);
+    });
+  }
+
+  function renderKaTeX(container) {
+    if (window.katex) {
+      let html = container.innerHTML;
+      html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+        try { return katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false }); } catch (e) { return match; }
+      });
+      html = html.replace(/\$([^\$]+?)\$/g, (match, formula) => {
+        try { return katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false }); } catch (e) { return match; }
+      });
+      container.innerHTML = html;
+    }
+  }
+
+  function renderFormattedText(textContainer, rawText) {
+    const sanitized = sanitizeAccuReply(rawText);
+    const parsedHtml = marked.parse(sanitized);
+    const cleanHtml = DOMPurify.sanitize(parsedHtml, { ADD_ATTR: ['class', 'style'] });
+    textContainer.innerHTML = cleanHtml;
+    enhanceTables(textContainer);
+    renderKaTeX(textContainer);
+  }
+
+  function copyTextToClipboard(text, btnElement) {
+    navigator.clipboard.writeText(text).then(() => {
+      const originalHTML = btnElement.innerHTML;
+      btnElement.innerHTML = `✓ คัดลอกแล้ว`;
+      setTimeout(() => { btnElement.innerHTML = originalHTML; }, 2000);
+    });
+  }
+
+  function forceScrollToTop(element) {
+    setTimeout(() => {
+      const mainContent = document.getElementById('mainContent');
+      mainContent.scrollTo({
+        top: element.offsetTop - 8,
+        behavior: 'smooth'
+      });
+    }, 30);
+  }
+
+  function appendMessage(sender, text, attachedFile = null, filePreviewUrl = null) {
+    document.getElementById('welcomeHero').style.display = 'none';
+    const mainContent = document.getElementById('mainContent');
+    mainContent.classList.add('chat-started');
+
+    document.body.classList.add('chat-active');
+
+    const chatStream = document.getElementById('chatStream');
+    chatStream.style.display = 'flex';
+
+    const containerDiv = document.createElement('div');
+    containerDiv.className = `message-container ${sender}`;
+
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message', sender);
+
+    if (attachedFile && sender === 'user') {
+      const fileBadge = document.createElement('div');
+      fileBadge.className = 'file-attachment-badge';
+      if (filePreviewUrl) {
+        fileBadge.innerHTML = `<img src="${filePreviewUrl}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;margin-right:4px;" /> <b>${attachedFile.name}</b>`;
+      } else {
+        fileBadge.innerHTML = `📄 <b>${attachedFile.name}</b> (${(attachedFile.size / 1024).toFixed(1)} KB)`;
+      }
+      msgDiv.appendChild(fileBadge);
+    }
+
+    const contentContainer = document.createElement('div');
+    contentContainer.className = sender === 'bot' ? 'bot-content' : 'user-content';
+
+    if (sender === 'bot') {
+      renderFormattedText(contentContainer, text);
+    } else {
+      contentContainer.textContent = text;
+    }
+
+    msgDiv.appendChild(contentContainer);
+    containerDiv.appendChild(msgDiv);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-action-btn';
+    copyBtn.innerHTML = `
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      คัดลอก
+    `;
+    copyBtn.onclick = () => copyTextToClipboard(text, copyBtn);
+    containerDiv.appendChild(copyBtn);
+
+    if (sender === 'user') {
+      setTimeout(() => copyBtn.classList.add('show'), 50);
+    }
+
+    chatStream.appendChild(containerDiv);
+    forceScrollToTop(containerDiv);
+
+    return { containerDiv, contentContainer, copyBtn, msgDiv };
+  }
+
+  async function processFileContent(file) {
+    return new Promise((resolve) => {
+      const fileType = file.type;
+      if (fileType.startsWith('image/')) {
+        compressImageFile(file, 700, 0.65).then((compressedUrl) => {
+          resolve({ type: 'image', dataUrl: compressedUrl });
+        });
+      } else if (fileType === 'application/pdf' || file.name.endsWith('.pdf')) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const pdf = await pdfjsLib.getDocument(new Uint8Array(e.target.result)).promise;
+            let fullText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+            }
+            resolve({ type: 'text', content: fullText.trim() });
+          } catch (err) {
+            resolve({ type: 'text', content: "[ไม่สามารถแกะ PDF ได้]" });
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({ type: 'text', content: e.target.result });
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  function setGeneratingState(generating) {
+    isGenerating = generating;
+    const submitBtn = document.getElementById('submitBtn');
+    if (generating) {
+      submitBtn.classList.add('stop-btn');
+      submitBtn.title = "หยุดตอบ";
+    } else {
+      submitBtn.classList.remove('stop-btn');
+      submitBtn.title = "ส่งข้อความ";
+    }
+  }
+
+  function handleSendOrStop() {
+    stopSpeechRecognition();
+    if (isGenerating) {
+      if (currentAbortController) currentAbortController.abort();
+    } else {
+      sendMessage();
+    }
+  }
+
+  async function sendMessage() {
+    const apiKey = HARDCODED_API_KEY;
+    const selectedModel = currentSelectedModel;
+    const inputEl = document.getElementById('userInput');
+    const text = inputEl.value.trim();
+
+    if (!text && !selectedFile) return;
+
+    setGeneratingState(true);
+    currentAbortController = new AbortController();
+
+    const fileToSend = selectedFile;
+    const previewUrlToSend = currentImagePreviewUrl;
+    
+    const userMsgObj = appendMessage('user', text, fileToSend, previewUrlToSend);
+    forceScrollToTop(userMsgObj.containerDiv);
+
+    inputEl.value = '';
+    clearSelectedFile();
+
+    let apiMessageContent = text;
+
+    if (fileToSend) {
+      const processed = await processFileContent(fileToSend);
+      if (processed.type === 'image') {
+        apiMessageContent = [
+          { type: "text", text: text || "วิเคราะห์ภาพนี้" },
+          { type: "image_url", image_url: { url: processed.dataUrl } }
+        ];
+      } else if (processed.type === 'text') {
+        apiMessageContent = `[ไฟล์: ${fileToSend.name}]\n${processed.content}\n\n${text}`;
+      }
+    }
+
+    conversationHistory.push({ role: "user", content: apiMessageContent });
+
+    const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
+    forceScrollToTop(botMsgDiv);
+
+    const loaderDiv = document.createElement('div');
+    loaderDiv.className = 'loader';
+    botMsgInner.appendChild(loaderDiv);
+
+    const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
+
+    async function makeRequest() {
+      const payload = { model: selectedModel, messages: conversationHistory, temperature: 0.5, stream: true };
+      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'x-api-key': apiKey };
+      try {
+        return await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+        return await fetch(proxyUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
+      }
+    }
+
+    let rawReply = "";
+
+    try {
+      const response = await makeRequest();
+      if (!response.ok) {
+        loaderDiv.remove();
+        contentSpan.textContent = `เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ (Status: ${response.status})`;
+        setGeneratingState(false);
+        return;
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let isFirstChunk = true;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        
+        chunk.split("\n").forEach(line => {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "").trim();
+            if (dataStr !== "[DONE]") {
+              try {
+                const parsed = JSON.parse(dataStr);
+                const content = parsed.choices[0]?.delta?.content || "";
+                if (content) {
+                  if (isFirstChunk) {
+                    loaderDiv.remove();
+                    botMsgInner.classList.add('typing-cursor');
+                    isFirstChunk = false;
+                  }
+                  rawReply += content;
+                  renderFormattedText(contentSpan, rawReply);
+                  forceScrollToTop(botMsgDiv);
+                }
+              } catch (e) {}
+            }
+          }
+        });
+      }
+
+      botMsgInner.classList.remove('typing-cursor');
+      renderFormattedText(contentSpan, rawReply);
+      
+      botCopyBtn.onclick = () => copyTextToClipboard(rawReply, botCopyBtn);
+      botCopyBtn.classList.add('show');
+
+      conversationHistory.push({ role: "assistant", content: rawReply });
+    } catch (error) {
+      if (loaderDiv) loaderDiv.remove();
+      if (botMsgInner) {
+        botMsgInner.classList.remove('typing-cursor');
+      }
+      
+      if (error.name === 'AbortError') {
+        if (rawReply.trim()) {
+          renderFormattedText(contentSpan, rawReply);
+          botCopyBtn.onclick = () => copyTextToClipboard(rawReply, botCopyBtn);
+          botCopyBtn.classList.add('show');
+          conversationHistory.push({ role: "assistant", content: rawReply });
+        } else {
+          contentSpan.textContent = 'หยุดการสร้างคำตอบชั่วคราวแล้ว';
+          botCopyBtn.onclick = () => copyTextToClipboard('หยุดการสร้างคำตอบชั่วคราวแล้ว', botCopyBtn);
+          botCopyBtn.classList.add('show');
+        }
+      } else {
+        contentSpan.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+      }
+    } finally {
+      setGeneratingState(false);
+      currentAbortController = null;
+    }
+  }
+
+  function handleKeyPress(event) {
+    if (event.key === 'Enter' && !isGenerating) sendMessage();
+  }
+</script>
+
+</body>
+  </html>
+  
