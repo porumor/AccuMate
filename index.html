@@ -125,6 +125,7 @@
       justify-content: center;
       padding: 4px;
     }
+    
     .custom-dropdown-container {
       position: relative;
       display: inline-block;
@@ -1189,34 +1190,37 @@
     document.getElementById('imageModal').classList.remove('open');
   }
 
-  // 📌 ฟังก์ชันดักจับการคลิกเริ่มแชตใหม่
   function startNewChat() {
+    // 📌 เช็กว่ามีการสนทนาเกิดขึ้นแล้วหรือยัง (เกิน 3 คือมีข้อความที่ผู้ใช้พิมพ์ไปแล้ว)
     const hasStartedChatting = conversationHistory.length > 3 || isGenerating;
     
     if (hasStartedChatting) {
-      const confirmReset = confirm("คุณแน่ใจหรือไม่ว่าต้องการเริ่มแชตใหม่? (ประวัติการคุยปัจจุบันจะไม่ถูกบันทึก)");
+      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความจะหายไป)");
       if (!confirmReset) return;
     } else {
-      return; // ถ้ายังไม่ได้เริ่มคุยเลย จะไม่เกิดอะไรขึ้น และไม่สุ่มคำต้อนรับใหม่
+      // 📌 ถ้ายังไม่มีการคุยอะไรเลย กดแล้วให้อยู่เฉยๆ ไม่เปลี่ยนคำต้อนรับ
+      return;
     }
 
     if (isGenerating && currentAbortController) currentAbortController.abort();
     stopSpeechRecognition();
+    
     conversationHistory = [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: "คุณคือใคร" },
       { role: "assistant", content: "สวัสดีครับ ผมชื่อ Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate ครับ ยินดีที่ได้ช่วยเหลือคุณครับ!" }
     ];
+    
     clearSelectedFile();
     const chatStream = document.getElementById('chatStream');
     chatStream.innerHTML = '';
     chatStream.style.display = 'none';
+    
     document.getElementById('mainContent').classList.remove('chat-started');
     document.body.classList.remove('chat-active');
     document.getElementById('welcomeHero').style.display = 'flex';
     
-    // สุ่มคำต้อนรับใหม่ เฉพาะตอนที่ผู้ใช้กดยืนยันให้เคลียร์แชตแล้วเท่านั้น
-    setRandomGreeting(); 
+    setRandomGreeting();
     setGeneratingState(false);
   }
 
@@ -1532,12 +1536,13 @@
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA (ถ้ายังไม่มีส่วนนี้)
+  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
     });
   }
 </script>
+
 </body>
 </html>
