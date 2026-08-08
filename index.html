@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AccuMate</title>
   
-  <!-- 📌 PWA Setup & Favicon -->
+  <!-- 📌 ฝังโลโก้ Vector (SVG) เป็น Favicon แทนรูปลูกโลก -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 500 500' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z' fill='%231a1d20'/><path d='M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z' fill='%231a1d20'/></svg>">
+  
+  <!-- 📌 PWA Setup -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="./logo.svg">
@@ -19,7 +21,7 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   </script>
 
-  <!-- Marked.js & DOMPurify สำหรับแปลง Markdown -->
+  <!-- Marked.js & DOMPurify สำหรับแปลง Markdown และ ตารางให้สวยงาม -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
@@ -123,7 +125,6 @@
       justify-content: center;
       padding: 4px;
     }
-
     .custom-dropdown-container {
       position: relative;
       display: inline-block;
@@ -209,6 +210,7 @@
     .demo-text-btn:hover {
       opacity: 0.8;
     }
+
     .demo-menu-card {
       position: absolute;
       top: calc(100% + 8px);
@@ -554,6 +556,7 @@
       50% { inset: 0 0 0 0; }
       100% { inset: 0 0 0 35px; }
     }
+
     .bottom-container {
       padding: 8px 16px calc(8px + env(safe-area-inset-bottom)) 16px;
       width: 100%;
@@ -668,24 +671,18 @@
       padding: 20px;
       animation: fadeIn 0.2s ease;
     }
-
-    .image-modal-overlay.open {
-      display: flex;
-    }
-
+    .image-modal-overlay.open { display: flex; }
     .image-modal-content {
       position: relative;
       max-width: 90vw;
       max-height: 90vh;
     }
-
     .image-modal-content img {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 12px;
       object-fit: contain;
     }
-
     .close-modal-btn {
       position: absolute;
       top: -40px; right: 0;
@@ -729,9 +726,7 @@
       min-width: 0;
     }
 
-    .input-capsule input::placeholder {
-      color: #64748b;
-    }
+    .input-capsule input::placeholder { color: #64748b; }
 
     .action-icons {
       display: flex;
@@ -784,9 +779,7 @@
       flex-shrink: 0;
     }
 
-    .send-rocket-btn.stop-btn {
-      background: #ef4444 !important;
-    }
+    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
 
     .icon-wrapper {
       position: relative;
@@ -837,8 +830,7 @@
   </style>
 </head>
 <body>
-
-  <!-- Top Header Bar -->
+<!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
       <div class="header-logo-svg">
@@ -1025,7 +1017,7 @@
   let currentAbortController = null;
   let currentSelectedModel = "claude-sonnet-5";
 
-  // 📌 ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
+  // 📌 ฟังก์ชันดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
     const modelDropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
@@ -1042,7 +1034,6 @@
     e.stopPropagation();
     const dropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
-    
     if (demoDropdown) demoDropdown.classList.remove('open');
     dropdown.classList.toggle('open');
   }
@@ -1051,7 +1042,6 @@
     e.stopPropagation();
     const dropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
-    
     if (dropdown) dropdown.classList.remove('open');
     demoDropdown.classList.toggle('open');
   }
@@ -1530,13 +1520,12 @@
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
+  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA (ติดตั้งแอปลงเครื่องได้)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
     });
   }
 </script>
-
 </body>
 </html>
