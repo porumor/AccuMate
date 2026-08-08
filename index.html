@@ -680,18 +680,24 @@
       padding: 20px;
       animation: fadeIn 0.2s ease;
     }
-    .image-modal-overlay.open { display: flex; }
+
+    .image-modal-overlay.open {
+      display: flex;
+    }
+
     .image-modal-content {
       position: relative;
       max-width: 90vw;
       max-height: 90vh;
     }
+
     .image-modal-content img {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 12px;
       object-fit: contain;
     }
+
     .close-modal-btn {
       position: absolute;
       top: -40px; right: 0;
@@ -735,7 +741,9 @@
       min-width: 0;
     }
 
-    .input-capsule input::placeholder { color: #64748b; }
+    .input-capsule input::placeholder {
+      color: #64748b;
+    }
 
     .action-icons {
       display: flex;
@@ -788,7 +796,9 @@
       flex-shrink: 0;
     }
 
-    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
+    .send-rocket-btn.stop-btn {
+      background: #ef4444 !important;
+    }
 
     .icon-wrapper {
       position: relative;
@@ -839,7 +849,8 @@
   </style>
 </head>
 <body>
-<!-- Top Header Bar -->
+
+  <!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
       <div class="header-logo-svg">
@@ -1009,19 +1020,20 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  // 📌 ปรับปรุง System Prompt ให้ฉลาดรองรับทุกภาษาบนโลก
-  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language in the world.
-  CRITICAL: Always respond in the SAME language the user uses to interact with you, unless instructed otherwise.
-  Formatting guidelines:
-  1. Use clean, professional, and well-structured language matching the user's language.
-  2. Format your response cleanly using Standard Markdown.
-  3. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
-  4. Do NOT output raw formatting symbols, broken code tags, or messy markdown. Keep it neat like leading AI assistants (ChatGPT/Claude).`;
+  // 📌 1. ปรับปรุง System Prompt บังคับให้ตรวจจับและตอบตามภาษาของผู้ใช้งาน
+  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. 
+CRITICAL RULE: You MUST strictly reply in the EXACT SAME LANGUAGE as the user's prompt. 
+- If the user types in English, you MUST reply entirely in English.
+- If the user types in Thai, you MUST reply entirely in Thai.
+- If the user types in another language, reply in that language.
+Formatting guidelines:
+1. Format your response cleanly using Standard Markdown.
+2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
+3. Do NOT output raw formatting symbols or messy markdown. Keep it neat like leading AI assistants.`;
 
+  // 📌 2. เคลียร์ประวัติการคุยจำลองทิ้ง เพื่อไม่ให้ AI จำฝังใจว่าต้องตอบภาษาไทยเท่านั้น
   let conversationHistory = [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: "คุณคือใคร" },
-    { role: "assistant", content: "สวัสดีครับ ผมชื่อ Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate ครับ ยินดีที่ได้ช่วยเหลือคุณครับ!" }
+    { role: "system", content: SYSTEM_PROMPT }
   ];
 
   let selectedFile = null;
@@ -1030,7 +1042,7 @@
   let currentAbortController = null;
   let currentSelectedModel = "claude-sonnet-5";
 
-  // 📌 ฟังก์ชันดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
+  // ดักจับการคลิกนอกกรอบเพื่อปิดดรอปดาวน์
   document.addEventListener('click', function(event) {
     const modelDropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
@@ -1080,7 +1092,7 @@
       return null;
     }
     const rec = new SpeechRecognition();
-    rec.lang = 'th-TH';
+    rec.lang = 'th-TH'; // สามารถตั้งเป็น 'en-US' หรือปล่อยว่างให้ตรวจจับเองได้
     rec.continuous = false;
     rec.interimResults = true;
 
@@ -1203,24 +1215,21 @@
   }
 
   function startNewChat() {
-    // 📌 เช็กว่ามีการเริ่มแชตหรือยัง (มีข้อความมากกว่า 3 หรือกำลังโหลดอยู่)
-    const hasStartedChatting = conversationHistory.length > 3 || isGenerating;
+    const hasStartedChatting = conversationHistory.length > 1 || isGenerating; // ปรับเงื่อนไขให้เหมาะกับการที่ไม่มีประวัติจำลองแล้ว
     
     if (hasStartedChatting) {
-      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความปัจจุบันจะหายไป)");
+      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความจะหายไป)");
       if (!confirmReset) return;
     } else {
-      // ถ้ายืนยันว่ายังไม่ได้เริ่มคุยอะไร ให้หยุดการทำงาน ไม่เกิดอะไรขึ้น และไม่เปลี่ยนคำทักทาย
       return; 
     }
 
     if (isGenerating && currentAbortController) currentAbortController.abort();
     stopSpeechRecognition();
     
+    // เคลียร์ประวัติให้เหลือแค่ System Prompt อย่างเดียว
     conversationHistory = [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: "คุณคือใคร" },
-      { role: "assistant", content: "สวัสดีครับ ผมชื่อ Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate ครับ ยินดีที่ได้ช่วยเหลือคุณครับ!" }
+      { role: "system", content: SYSTEM_PROMPT }
     ];
     
     clearSelectedFile();
@@ -1236,13 +1245,11 @@
     setGeneratingState(false);
   }
 
-  // 📌 ปรับปรุงตัวกรองคำให้รองรับหลายภาษามากขึ้น
+  // 📌 3. ปรับปรุงตัวกรอง ให้ปลอดภัย ไม่แปลกปลอมกับภาษาอื่น
   function sanitizeAccuReply(text) {
     let cleanText = text;
-    if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท") || cleanText.includes("As an AI") || cleanText.includes("I cannot fulfill")) {
-      return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ? / Hello! I am Accu, how can I help you today?";
-    }
-    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
+    // แทนที่ชื่อ AI ค่ายอื่นให้เป็น Accu อย่างแนบเนียน
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
     cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
   }
@@ -1448,6 +1455,11 @@
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
+    let requestHistory = conversationHistory;
+    if (conversationHistory.length > 7) {
+      requestHistory = [conversationHistory[0], ...conversationHistory.slice(-6)];
+    }
+
     const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
     forceScrollToTop(botMsgDiv);
 
@@ -1458,7 +1470,7 @@
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      const payload = { model: selectedModel, messages: conversationHistory, temperature: 0.5, stream: true };
+      const payload = { model: selectedModel, messages: requestHistory, temperature: 0.5, stream: true };
       const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'x-api-key': apiKey };
       try {
         return await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
@@ -1549,7 +1561,7 @@
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
+  // ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
