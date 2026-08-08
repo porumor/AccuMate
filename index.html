@@ -1189,7 +1189,17 @@
     document.getElementById('imageModal').classList.remove('open');
   }
 
+  // 📌 ฟังก์ชันดักจับการคลิกเริ่มแชตใหม่
   function startNewChat() {
+    const hasStartedChatting = conversationHistory.length > 3 || isGenerating;
+    
+    if (hasStartedChatting) {
+      const confirmReset = confirm("คุณแน่ใจหรือไม่ว่าต้องการเริ่มแชตใหม่? (ประวัติการคุยปัจจุบันจะไม่ถูกบันทึก)");
+      if (!confirmReset) return;
+    } else {
+      return; // ถ้ายังไม่ได้เริ่มคุยเลย จะไม่เกิดอะไรขึ้น และไม่สุ่มคำต้อนรับใหม่
+    }
+
     if (isGenerating && currentAbortController) currentAbortController.abort();
     stopSpeechRecognition();
     conversationHistory = [
@@ -1204,7 +1214,9 @@
     document.getElementById('mainContent').classList.remove('chat-started');
     document.body.classList.remove('chat-active');
     document.getElementById('welcomeHero').style.display = 'flex';
-    setRandomGreeting();
+    
+    // สุ่มคำต้อนรับใหม่ เฉพาะตอนที่ผู้ใช้กดยืนยันให้เคลียร์แชตแล้วเท่านั้น
+    setRandomGreeting(); 
     setGeneratingState(false);
   }
 
@@ -1520,7 +1532,7 @@
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA (ติดตั้งแอปลงเครื่องได้)
+  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA (ถ้ายังไม่มีส่วนนี้)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
