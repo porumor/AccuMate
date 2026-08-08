@@ -255,7 +255,6 @@
       line-height: 1.4;
     }
 
-    /* 📌 ส่วนนี้คือการเพิ่มเลขเวอร์ชันให้สวยงาม */
     .demo-version-tag {
       font-size: 9.5px;
       color: #94a3b8;
@@ -681,24 +680,18 @@
       padding: 20px;
       animation: fadeIn 0.2s ease;
     }
-
-    .image-modal-overlay.open {
-      display: flex;
-    }
-
+    .image-modal-overlay.open { display: flex; }
     .image-modal-content {
       position: relative;
       max-width: 90vw;
       max-height: 90vh;
     }
-
     .image-modal-content img {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 12px;
       object-fit: contain;
     }
-
     .close-modal-btn {
       position: absolute;
       top: -40px; right: 0;
@@ -742,9 +735,7 @@
       min-width: 0;
     }
 
-    .input-capsule input::placeholder {
-      color: #64748b;
-    }
+    .input-capsule input::placeholder { color: #64748b; }
 
     .action-icons {
       display: flex;
@@ -797,9 +788,7 @@
       flex-shrink: 0;
     }
 
-    .send-rocket-btn.stop-btn {
-      background: #ef4444 !important;
-    }
+    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
 
     .icon-wrapper {
       position: relative;
@@ -850,8 +839,7 @@
   </style>
 </head>
 <body>
-
-  <!-- Top Header Bar -->
+<!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
       <div class="header-logo-svg">
@@ -1021,9 +1009,11 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. Respond in Thai. 
+  // 📌 ปรับปรุง System Prompt ให้ฉลาดรองรับทุกภาษาบนโลก
+  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language in the world.
+  CRITICAL: Always respond in the SAME language the user uses to interact with you, unless instructed otherwise.
   Formatting guidelines:
-  1. Use clean, professional, and well-structured Thai language.
+  1. Use clean, professional, and well-structured language matching the user's language.
   2. Format your response cleanly using Standard Markdown.
   3. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
   4. Do NOT output raw formatting symbols, broken code tags, or messy markdown. Keep it neat like leading AI assistants (ChatGPT/Claude).`;
@@ -1213,12 +1203,14 @@
   }
 
   function startNewChat() {
+    // 📌 เช็กว่ามีการเริ่มแชตหรือยัง (มีข้อความมากกว่า 3 หรือกำลังโหลดอยู่)
     const hasStartedChatting = conversationHistory.length > 3 || isGenerating;
     
     if (hasStartedChatting) {
-      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความจะหายไป)");
+      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความปัจจุบันจะหายไป)");
       if (!confirmReset) return;
     } else {
+      // ถ้ายืนยันว่ายังไม่ได้เริ่มคุยอะไร ให้หยุดการทำงาน ไม่เกิดอะไรขึ้น และไม่เปลี่ยนคำทักทาย
       return; 
     }
 
@@ -1244,12 +1236,13 @@
     setGeneratingState(false);
   }
 
+  // 📌 ปรับปรุงตัวกรองคำให้รองรับหลายภาษามากขึ้น
   function sanitizeAccuReply(text) {
     let cleanText = text;
-    if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
-      return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
+    if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท") || cleanText.includes("As an AI") || cleanText.includes("I cannot fulfill")) {
+      return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ? / Hello! I am Accu, how can I help you today?";
     }
-    cleanText = cleanText.replace(/ผมชื่อ\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "ผมชื่อ Accu ครับ");
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
     cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
   }
@@ -1453,13 +1446,7 @@
       }
     }
 
-    // 📌 ทำการบันทึกประวัติการแชตและจำกัดประวัติเพื่อป้องกัน API Error ในมือถือ
     conversationHistory.push({ role: "user", content: apiMessageContent });
-
-    let requestHistory = conversationHistory;
-    if (conversationHistory.length > 7) {
-      requestHistory = [conversationHistory[0], ...conversationHistory.slice(-6)];
-    }
 
     const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
     forceScrollToTop(botMsgDiv);
@@ -1471,7 +1458,7 @@
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      const payload = { model: selectedModel, messages: requestHistory, temperature: 0.5, stream: true };
+      const payload = { model: selectedModel, messages: conversationHistory, temperature: 0.5, stream: true };
       const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'x-api-key': apiKey };
       try {
         return await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
@@ -1562,7 +1549,7 @@
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA (ถ้ายังไม่มีส่วนนี้)
+  // 📌 ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
