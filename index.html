@@ -316,6 +316,24 @@
       background: #f8fafc;
     }
 
+    /* 📌 สไตล์สำหรับรายการที่ถูกล็อก */
+    .dropdown-option-item.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: transparent !important;
+    }
+    
+    .lock-icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: #94a3b8;
+    }
+
     .option-check {
       width: 16px;
       height: 16px;
@@ -865,14 +883,15 @@
       <!-- Custom Dropdown Selector -->
       <div class="custom-dropdown-container" id="modelDropdown">
         <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
-          <span id="selectedModelLabel">AccuMate Alpha</span>
+          <span id="selectedModelLabel">AccuMate Ultra</span>
           <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </button>
 
         <div class="dropdown-menu-card">
-          <div class="dropdown-option-item selected" onclick="selectModel('claude-sonnet-5', 'AccuMate Alpha', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <!-- 🔒 Alpha ล็อกการใช้งานชั่วคราว -->
+          <div class="dropdown-option-item locked">
+            <div class="lock-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>
             <div class="option-content">
               <div class="option-header-row"><span class="option-title">AccuMate Alpha</span></div>
@@ -880,9 +899,10 @@
             </div>
           </div>
 
-          <div class="dropdown-option-item" onclick="selectModel('claude-fable-5', 'AccuMate Flash', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <!-- 🔒 Flash ล็อกการใช้งานชั่วคราว -->
+          <div class="dropdown-option-item locked">
+            <div class="lock-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>
             <div class="option-content">
               <div class="option-header-row"><span class="option-title">AccuMate Flash</span><span class="new-badge">ไวพิเศษ</span></div>
@@ -890,13 +910,14 @@
             </div>
           </div>
 
-          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'AccuMate Ultra', this)">
+          <!-- ✅ Ultra โมเดล Grok-4.5 เปิดใช้งานปกติ -->
+          <div class="dropdown-option-item selected" onclick="selectModel('grok-4.5', 'AccuMate Ultra', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
               <div class="option-header-row"><span class="option-title">AccuMate Ultra</span></div>
-              <span class="option-desc">โจทย์ซับซ้อนและคิดคำนวณขั้นสูง</span>
+              <span class="option-desc">โจทย์ซับซ้อนและคิดคำนวณ (Grok-4.5)</span>
             </div>
           </div>
         </div>
@@ -1020,18 +1041,18 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  // 📌 1. ปรับปรุง System Prompt บังคับให้ตรวจจับและตอบตามภาษาของผู้ใช้งาน
-  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. 
-CRITICAL RULE: You MUST strictly reply in the EXACT SAME LANGUAGE as the user's prompt. 
-- If the user types in English, you MUST reply entirely in English.
-- If the user types in Thai, you MUST reply entirely in Thai.
-- If the user types in another language, reply in that language.
+  // 📌 1. ปรับปรุง System Prompt บังคับให้ตอบเป็นภาษาเดียวกับผู้ใช้เด็ดขาด
+  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
+CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
+- If the user types in English, reply ONLY in English.
+- If the user types in Thai, reply ONLY in Thai.
+- If the user types in Japanese, reply ONLY in Japanese.
 Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
 2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
-3. Do NOT output raw formatting symbols or messy markdown. Keep it neat like leading AI assistants.`;
+3. Keep the tone helpful, professional, and neat.`;
 
-  // 📌 2. เคลียร์ประวัติการคุยจำลองทิ้ง เพื่อไม่ให้ AI จำฝังใจว่าต้องตอบภาษาไทยเท่านั้น
+  // 📌 2. เคลียร์ประวัติหลอกทิ้ง ให้มีแต่ System Prompt (สมองจะได้ไม่จำว่าต้องตอบไทย)
   let conversationHistory = [
     { role: "system", content: SYSTEM_PROMPT }
   ];
@@ -1040,9 +1061,11 @@ Formatting guidelines:
   let currentImagePreviewUrl = null;
   let isGenerating = false;
   let currentAbortController = null;
-  let currentSelectedModel = "claude-sonnet-5";
+  
+  // 📌 3. เปลี่ยน Model เริ่มต้นให้เป็น grok-4.5
+  let currentSelectedModel = "grok-4.5";
 
-  // ดักจับการคลิกนอกกรอบเพื่อปิดดรอปดาวน์
+  // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
     const modelDropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
@@ -1072,10 +1095,13 @@ Formatting guidelines:
   }
 
   function selectModel(modelValue, modelDisplay, element) {
+    // ป้องกันการกดตัวเลือกที่โดนล็อค
+    if(element.classList.contains('locked')) return;
+
     currentSelectedModel = modelValue;
     document.getElementById('selectedModelLabel').textContent = modelDisplay;
     
-    const items = document.querySelectorAll('.dropdown-option-item');
+    const items = document.querySelectorAll('.dropdown-option-item:not(.locked)');
     items.forEach(item => item.classList.remove('selected'));
     element.classList.add('selected');
 
@@ -1092,7 +1118,7 @@ Formatting guidelines:
       return null;
     }
     const rec = new SpeechRecognition();
-    rec.lang = 'th-TH'; // สามารถตั้งเป็น 'en-US' หรือปล่อยว่างให้ตรวจจับเองได้
+    rec.lang = 'th-TH';
     rec.continuous = false;
     rec.interimResults = true;
 
@@ -1215,10 +1241,11 @@ Formatting guidelines:
   }
 
   function startNewChat() {
-    const hasStartedChatting = conversationHistory.length > 1 || isGenerating; // ปรับเงื่อนไขให้เหมาะกับการที่ไม่มีประวัติจำลองแล้ว
+    // 📌 เช็กจากประวัติแชต (เนื่องจากตอนนี้เริ่มด้วย 1 object ใน array)
+    const hasStartedChatting = conversationHistory.length > 1 || isGenerating;
     
     if (hasStartedChatting) {
-      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความจะหายไป)");
+      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความปัจจุบันจะหายไป)");
       if (!confirmReset) return;
     } else {
       return; 
@@ -1227,7 +1254,6 @@ Formatting guidelines:
     if (isGenerating && currentAbortController) currentAbortController.abort();
     stopSpeechRecognition();
     
-    // เคลียร์ประวัติให้เหลือแค่ System Prompt อย่างเดียว
     conversationHistory = [
       { role: "system", content: SYSTEM_PROMPT }
     ];
@@ -1245,10 +1271,14 @@ Formatting guidelines:
     setGeneratingState(false);
   }
 
-  // 📌 3. ปรับปรุงตัวกรอง ให้ปลอดภัย ไม่แปลกปลอมกับภาษาอื่น
+  // 📌 4. ปรับปรุงตัวกรองไม่ให้แปลชื่อเราเป็นไทยเวลาคุยอังกฤษ
   function sanitizeAccuReply(text) {
     let cleanText = text;
-    // แทนที่ชื่อ AI ค่ายอื่นให้เป็น Accu อย่างแนบเนียน
+    // ป้องกันการแบนคำที่ AI มักตอบปฏิเสธ และปรับให้เข้ากับภาษา
+    if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
+      return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
+    }
+    // แทนที่ชื่อตัวละครอื่นด้วย Accu 
     cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
     cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
