@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- 📌 1. บังคับเบราว์เซอร์ไม่ให้จำแคช (No-Cache Meta Tags) -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <title>AccuMate</title>
   
   <!-- 📌 ฝังโลโก้ Vector (SVG) เป็น Favicon -->
@@ -314,6 +320,12 @@
 
     .dropdown-option-item:hover {
       background: #f8fafc;
+    }
+
+    .dropdown-option-item.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: transparent !important;
     }
 
     .option-check {
@@ -850,6 +862,17 @@
 </head>
 <body>
 
+  <!-- 📌 2. รันสคริปต์ล้างแคชทันทีก่อนโหลดหน้าแอป -->
+  <script>
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+  </script>
+
   <!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
@@ -870,7 +893,7 @@
         </button>
 
         <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Opus 5 (ถูกเลือกเป็นค่าเริ่มต้น) -->
+          <!-- ✅ ตัวเลือกที่ 1: Opus 5 (ค่าเริ่มต้น) -->
           <div class="dropdown-option-item selected" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
@@ -1023,7 +1046,6 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  // 📌 1. System Prompt ที่บังคับภาษาและตัวตนที่ชัดเจน
   const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
 CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
 - If the user types in English, reply ONLY in English.
@@ -1034,7 +1056,6 @@ Formatting guidelines:
 2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
 3. Keep the tone helpful, professional, and neat.`;
 
-  // 📌 2. เคลียร์ประวัติหลอก เริ่มต้นด้วย System Prompt อย่างเดียวเพื่อให้ระบบภาษาสมบูรณ์
   let conversationHistory = [
     { role: "system", content: SYSTEM_PROMPT }
   ];
@@ -1044,7 +1065,7 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 3. ตั้งค่า Model เริ่มต้นเป็น Claude Opus 5 ตามที่แก้ไขใหม่
+  // 📌 4. เปลี่ยนโมเดลเริ่มต้นกลับไปเป็น Claude Opus 5
   let currentSelectedModel = "claude-opus-5";
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
@@ -1077,7 +1098,6 @@ Formatting guidelines:
   }
 
   function selectModel(modelValue, modelDisplay, element) {
-    // ป้องกันการกดตัวเลือกที่โดนล็อค
     if(element.classList.contains('locked')) return;
 
     currentSelectedModel = modelValue;
@@ -1223,7 +1243,6 @@ Formatting guidelines:
   }
 
   function startNewChat() {
-    // 📌 เช็กจากประวัติแชตว่าคุยกันหรือยัง
     const hasStartedChatting = conversationHistory.length > 1 || isGenerating;
     
     if (hasStartedChatting) {
@@ -1255,11 +1274,9 @@ Formatting guidelines:
 
   function sanitizeAccuReply(text) {
     let cleanText = text;
-    // ป้องกันการแบนคำที่ AI มักตอบปฏิเสธ
     if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
       return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
     }
-    // เราใช้งาน Kiro อยู่ด้านหลัง แต่ให้แสดงผลชื่อเป็น Accu ต่อผู้ใช้งานเสมอ
     cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
     cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
@@ -1572,10 +1589,11 @@ Formatting guidelines:
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // ลงทะเบียน Service Worker เพื่อให้รองรับ PWA
+  // 📌 5. ลงทะเบียน Service Worker เพื่อบังคับเคลียร์แคช (Bypass Cache)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err));
+      // เติม ?v= เพื่อบังคับโหลดไฟล์ใหม่เสมอ
+      navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime()).catch(err => console.log('SW fail', err));
     });
   }
 </script>
