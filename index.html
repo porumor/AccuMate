@@ -482,7 +482,7 @@
       border-radius: 6px;
       opacity: 0;
       transform: translateY(6px);
-      transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
     }
 
     .copy-action-btn.show {
@@ -604,7 +604,7 @@
       width: fit-content;
       max-width: 100%;
       border: 1px solid rgba(226, 232, 240, 0.8);
-      animation: fadeIn 0.2s ease;
+      animation: fadeIn 0.25s ease;
     }
 
     .preview-thumbnail-wrap {
@@ -799,7 +799,7 @@
       padding: 0;
       position: relative;
       overflow: hidden;
-      transition: background 0.2s ease, transform 0.2s ease;
+      transition: background 0.3s ease, transform 0.2s ease;
       flex-shrink: 0;
     }
 
@@ -888,7 +888,7 @@
         </button>
 
         <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็วขั้นสุด) -->
+          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็ว) -->
           <div class="dropdown-option-item selected" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
@@ -939,7 +939,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.2-Fast</div>
+            <div class="demo-version-tag">v1.0.3-Fast</div>
           </div>
           
           <div class="developer-section">
@@ -1041,12 +1041,22 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. 
-CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses. 
+  // 📌 System Prompt อัปเกรดเพื่อรีดความเร็วขีดสุด และบังคับภาษา
+  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
+CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
+- If the user types in English, reply ONLY in English.
+- If the user types in Thai, reply ONLY in Thai.
+
+⚡ SPEED OPTIMIZATION RULE (CRITICAL):
+To maximize response speed, you MUST be EXTREMELY CONCISE and direct. 
+- Skip long introductions (Do not say "นี่คือคำตอบ..." or "Certainly!").
+- Omit unnecessary polite fluff.
+- Get straight to the point immediately.
+- Use bullet points for quick reading.
+
 Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
-2. If presenting comparisons, lists, or structured data, ALWAYS render them in Markdown Tables.
-3. Keep the tone helpful, professional, and neat.`;
+2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.`;
 
   let conversationHistory = [
     { role: "system", content: SYSTEM_PROMPT }
@@ -1057,7 +1067,7 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 เปลี่ยนโมเดลค่าเริ่มต้นเป็นรุ่นความเร็วสูง (Fable)
+  // 📌 เปลี่ยนโมเดลเริ่มต้นเป็นรุ่น Fable (ความเร็วสูง)
   let currentSelectedModel = "claude-fable-5";
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
@@ -1475,9 +1485,9 @@ Formatting guidelines:
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
-    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด ส่งไปแค่ 2-3 อันล่าสุด
+    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด ส่งไปแค่ประโยคตั้งต้น และ 3 ประโยคล่าสุด
     let requestHistory = [conversationHistory[0]]; 
-    if (conversationHistory.length > 3) {
+    if (conversationHistory.length > 4) {
       requestHistory.push(...conversationHistory.slice(-3));
     } else {
       requestHistory.push(...conversationHistory.slice(1));
@@ -1493,12 +1503,12 @@ Formatting guidelines:
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      // 📌 ปรับจูนความไวด้วย Temperature และบอกเบราว์เซอร์ให้เปิดการเชื่อมต่อรอไว้
+      // 📌 ปรับอุณหภูมิ (Temperature) ให้เน้นตอบตรงประเด็นและไวที่สุด ไม่ต้องคิดคำยาวๆ
       const payload = { 
         model: selectedModel, 
         messages: requestHistory, 
-        temperature: 0.2, // ลดความสร้างสรรค์ = AI คิดและตอบกลับไวขึ้น 
-        max_tokens: 1024, // ควบคุมการจำกัดปริมาณคำ
+        temperature: 0.2, 
+        max_tokens: 1024,
         stream: true 
       };
       
