@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
+  <!-- ⚡ ระบบทำลายแคช ให้เบราว์เซอร์อ่านไฟล์ใหม่เสมอ -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -12,13 +13,16 @@
 
   <title>AccuMate</title>
   
+  <!-- 📌 ฝังโลโก้ Vector (SVG) เป็น Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 500 500' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z' fill='%231a1d20'/><path d='M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z' fill='%231a1d20'/></svg>">
+  
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="./logo.svg">
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
+  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -27,49 +31,471 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kanit', -apple-system, sans-serif; }
-    button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; outline: none; }
-    button:focus, input:focus, select:focus { outline: none !important; }
-    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
-    body { background: #ffffff; display: flex; flex-direction: column; position: relative; }
-    body::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #ffffff 50%, #dbeafe 100%); z-index: -1; opacity: 1; transition: opacity 3s cubic-bezier(0.25, 0.8, 0.25, 1); pointer-events: none; }
-    body.chat-active::before { opacity: 0; }
-    .top-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: transparent; z-index: 100; position: relative; flex-shrink: 0; gap: 6px; border-bottom: 1px solid rgba(226, 232, 240, 0.6); }
-    .header-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
-    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .header-logo-svg { width: 18px; height: 18px; display: flex; align-items: center; flex-shrink: 0; }
-    .brand-title { font-size: 15px; font-weight: 500; color: #1e293b; white-space: nowrap; }
-    .icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
-    .dropdown-arrow { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; }
-    .demo-dropdown-wrap { position: relative; display: inline-block; }
-    .demo-text-btn { font-size: 11.5px; font-weight: 500; color: #2563eb; background: none; border: none; padding: 4px 6px; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: opacity 0.2s; white-space: nowrap; }
-    .demo-text-btn:hover { opacity: 0.8; }
-    .demo-dropdown-wrap.open .dropdown-arrow { transform: rotate(180deg); }
-    .demo-menu-card { position: absolute; top: calc(100% + 8px); right: 0; width: min(260px, 85vw); background: #ffffff; border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(226, 232, 240, 0.8); padding: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 200; opacity: 0; visibility: hidden; transform: translateY(-12px) scale(0.95); transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s; transform-origin: top right; }
-    .demo-dropdown-wrap.open .demo-menu-card { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-    .demo-title { font-size: 13px; font-weight: 500; color: #0f172a; display: flex; align-items: center; gap: 6px; }
-    .demo-desc { font-size: 11.5px; color: #475569; line-height: 1.4; }
-    .demo-version-tag { font-size: 9.5px; color: #94a3b8; text-align: right; margin-top: 4px; font-weight: 400; }
-    .developer-section { border-top: 1px solid #f1f5f9; padding-top: 6px; margin-top: 2px; display: flex; align-items: center; justify-content: space-between; }
-    .dev-label { font-size: 11px; color: #64748b; }
-    .ig-link { display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 10px; color: #0f172a; font-size: 11.5px; font-weight: 500; text-decoration: none; transition: background 0.2s; }
-    .ig-link:hover { background: #f1f5f9; }
-    .ig-link svg { width: 13px; height: 13px; fill: #e1306c; }
-    .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px; overflow-y: auto; scroll-behavior: smooth; width: 100%; max-width: 680px; margin: 0 auto; min-height: 0; }
-    .welcome-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; animation: fadeIn 0.5s ease; margin: auto 0; }
-    .hero-logo-svg { width: 56px; height: 56px; color: #1a1d20; }
-    .welcome-title { font-size: 14px; font-weight: 400; color: #475569; transition: opacity 0.3s ease; padding: 0 10px; }
-    .chat-stream { width: 100%; display: flex; flex-direction: column; gap: 16px; padding-bottom: 60px; }
-    .message-container { display: flex; flex-direction: column; width: 100%; margin-bottom: 12px; animation: messageSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes messageSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    .message-container.user { align-items: flex-end; }
-    .message-container.bot { align-items: flex-start; }
-    .message { padding: 12px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.6; word-break: break-word; }
-    .message.user { max-width: 85%; background: #2563eb; color: #ffffff; border-bottom-right-radius: 4px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2); }
-    .message.bot { width: 100%; max-width: 100%; background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; padding: 4px 0 !important; color: #0f172a; }
-    .copy-action-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 11.5px; font-weight: 400; padding: 4px 6px; margin-top: 4px; border-radius: 6px; opacity: 0; transform: translateY(6px); transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s; }
-    .copy-action-btn.show { opacity: 0.6; transform: translateY(0); }
-    .copy-action-btn:hover { opacity: 1; color: #0f172a; background: rgba(0, 0, 0, 0.03); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    button, a, input, select, textarea {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    button:focus, input:focus, select:focus {
+      outline: none !important;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    body {
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #ffffff 50%, #dbeafe 100%);
+      z-index: -1;
+      opacity: 1;
+      transition: opacity 3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      pointer-events: none;
+    }
+
+    body.chat-active::before {
+      opacity: 0;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: transparent;
+      z-index: 100;
+      position: relative;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .header-logo-svg {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+    
+    .custom-dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-trigger-btn {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+      background: rgba(241, 245, 249, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      outline: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .dropdown-trigger-btn:hover {
+      background: rgba(241, 245, 249, 1);
+    }
+
+    .dropdown-arrow {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+
+    .custom-dropdown-container.open .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu-card {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: min(240px, 80vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px) scale(0.95);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+      transform-origin: top left;
+    }
+
+    .custom-dropdown-container.open .dropdown-menu-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .demo-dropdown-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .demo-text-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #2563eb;
+      background: none;
+      border: none;
+      padding: 4px 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .demo-text-btn:hover {
+      opacity: 0.8;
+    }
+
+    .demo-menu-card {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      left: auto;
+      width: min(260px, 85vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px) scale(0.95);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+      transform-origin: top right;
+    }
+
+    .demo-dropdown-wrap.open .demo-menu-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .demo-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-desc {
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .demo-version-tag {
+      font-size: 9.5px;
+      color: #94a3b8;
+      text-align: right;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .developer-section {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 6px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dev-label {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .ig-link {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 8px;
+      border-radius: 10px;
+      color: #0f172a;
+      font-size: 11.5px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .ig-link:hover {
+      background: #f1f5f9;
+    }
+
+    .ig-link svg {
+      width: 13px;
+      height: 13px;
+      fill: #e1306c;
+    }
+
+    .dropdown-option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown-option-item:hover {
+      background: #f8fafc;
+    }
+
+    .dropdown-option-item.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: transparent !important;
+    }
+
+    .option-check {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      visibility: hidden;
+      color: #0f172a;
+    }
+
+    .dropdown-option-item.selected .option-check {
+      visibility: visible;
+    }
+
+    .option-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .option-header-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .option-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .new-badge {
+      font-size: 9.5px;
+      font-weight: 400;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 8px;
+    }
+
+    .option-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 1px;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      min-height: 0;
+    }
+
+    .welcome-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+      animation: fadeIn 0.5s ease;
+      margin: auto 0;
+    }
+
+    .hero-logo-svg {
+      width: 56px;
+      height: 56px;
+      color: #1a1d20;
+    }
+
+    .welcome-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #475569;
+      transition: opacity 0.3s ease;
+      padding: 0 10px;
+    }
+
+    .chat-stream {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 60px;
+    }
+
+    .message-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 12px;
+      animation: messageSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes messageSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-container.user {
+      align-items: flex-end;
+    }
+
+    .message-container.bot {
+      align-items: flex-start;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .message.user {
+      max-width: 85%;
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+
+    .message.bot {
+      width: 100%;
+      max-width: 100%;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 4px 0 !important;
+      color: #0f172a;
+    }
+
+    .copy-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #64748b;
+      font-size: 11.5px;
+      font-weight: 400;
+      padding: 4px 6px;
+      margin-top: 4px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+    }
+
+    .copy-action-btn.show {
+      opacity: 0.6;
+      transform: translateY(0);
+    }
+
+    .copy-action-btn:hover {
+      opacity: 1;
+      color: #0f172a;
+      background: rgba(0, 0, 0, 0.03);
+    }
+
     .bot-content p { margin-bottom: 10px; }
     .bot-content p:last-child { margin-bottom: 0; }
     .bot-content ul, .bot-content ol { margin: 8px 0 12px 20px; }
@@ -78,60 +504,366 @@
     .bot-content h1 { font-size: 17px; }
     .bot-content h2 { font-size: 15px; }
     .bot-content h3 { font-size: 14px; }
-    .table-container { position: relative; margin: 12px 0; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .bot-content table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    .bot-content th, .bot-content td { white-space: nowrap !important; padding: 8px 14px; font-size: 13.5px; }
-    .bot-content th { background: #f8fafc; color: #334155; font-weight: 500; text-align: left; border-bottom: 2px solid #e2e8f0; }
-    .bot-content td { border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+
+    .table-container {
+      position: relative;
+      margin: 12px 0;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .bot-content table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    .bot-content th, .bot-content td {
+      white-space: nowrap !important;
+      padding: 8px 14px;
+      font-size: 13.5px;
+    }
+
+    .bot-content th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 500;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .bot-content td {
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+
     .bot-content tr:nth-child(even) td { background: #fafafa; }
-    .file-attachment-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 10px; margin-bottom: 6px; font-size: 12px; }
-    .loader { width: 65px; height: 30px; position: relative; margin: 4px 0; }
-    .loader:before { content: ""; position: absolute; border-radius: 50px; box-shadow: 0 0 0 3px inset #0f172a; animation: l3 0.6s infinite alternate; }
-    @keyframes l3 { 0% { inset: 0 35px 0 0; } 50% { inset: 0 0 0 0; } 100% { inset: 0 0 0 35px; } }
-    .bottom-container { padding: 8px 16px calc(8px + env(safe-area-inset-bottom)) 16px; width: 100%; max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; z-index: 100; }
-    .copyright-footer { font-size: 11px; color: #64748b; text-align: center; padding-top: 4px; width: 100%; letter-spacing: 0.2px; }
-    .file-preview-card { display: none; align-items: center; gap: 10px; background: #f1f5f9; padding: 6px 10px; border-radius: 20px; width: fit-content; max-width: 100%; border: 1px solid rgba(226, 232, 240, 0.8); animation: fadeIn 0.2s ease; }
-    .preview-thumbnail-wrap { position: relative; width: 44px; height: 44px; border-radius: 14px; overflow: hidden; cursor: pointer; flex-shrink: 0; background: #e2e8f0; display: flex; align-items: center; justify-content: center; }
-    .preview-thumbnail-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .preview-file-icon { color: #ef4444; font-size: 20px; display: flex; align-items: center; justify-content: center; }
-    .file-preview-info { display: flex; flex-direction: column; font-size: 13px; max-width: 180px; }
-    .file-preview-name { font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .file-preview-size { font-size: 11px; color: #64748b; }
-    .remove-file-btn { border: none; background: rgba(0, 0, 0, 0.08); color: #334155; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; margin-left: 4px; }
-    .remove-file-btn:hover { background: rgba(0, 0, 0, 0.15); }
-    .image-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.2s ease; }
-    .image-modal-overlay.open { display: flex; }
-    .image-modal-content { position: relative; max-width: 90vw; max-height: 90vh; }
-    .image-modal-content img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
-    .close-modal-btn { position: absolute; top: -40px; right: 0; background: none; border: none; color: #ffffff; font-size: 28px; cursor: pointer; padding: 4px; }
-    .input-capsule { background: #ffffff; border-radius: 30px; padding: 6px 10px 6px 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); }
-    .add-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #475569; font-size: 20px; flex-shrink: 0; }
-    .input-capsule input[type="text"] { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; color: #1e293b; min-width: 0; }
-    .input-capsule input::placeholder { color: #64748b; }
-    .action-icons { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .mic-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; transition: all 0.3s ease; }
-    .mic-btn.listening { background: #ef4444 !important; color: #ffffff !important; animation: pulseMic 1.2s infinite ease-in-out; }
-    @keyframes pulseMic { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-    .send-rocket-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: #2563eb; color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; position: relative; overflow: hidden; transition: background 0.2s ease, transform 0.2s ease; flex-shrink: 0; }
-    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
-    .icon-wrapper { position: relative; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
-    .send-rocket-btn #rocketIcon, .send-rocket-btn #stopIcon { position: absolute; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; display: block; }
-    .send-rocket-btn #rocketIcon { opacity: 1; transform: scale(1) rotate(0deg) translate(-1px, 1px); }
-    .send-rocket-btn #stopIcon { opacity: 0; transform: scale(0) rotate(-180deg); }
-    .send-rocket-btn.stop-btn #rocketIcon { opacity: 0 !important; transform: scale(0) rotate(180deg) translate(-1px, 1px) !important; }
-    .send-rocket-btn.stop-btn #stopIcon { opacity: 1 !important; transform: scale(1) rotate(0deg) !important; }
-    .typing-cursor::after { content: '▋'; display: inline-block; animation: blink 0.8s infinite; color: #2563eb; margin-left: 2px; }
+
+    .file-attachment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .loader {
+      width: 65px;
+      height: 30px;
+      position: relative;
+      margin: 4px 0;
+    }
+    .loader:before {
+      content: "";
+      position: absolute;
+      border-radius: 50px;
+      box-shadow: 0 0 0 3px inset #0f172a;
+      animation: l3 0.6s infinite alternate;
+    }
+    @keyframes l3 {
+      0% { inset: 0 35px 0 0; }
+      50% { inset: 0 0 0 0; }
+      100% { inset: 0 0 0 35px; }
+    }
+
+    .bottom-container {
+      padding: 8px 16px calc(8px + env(safe-area-inset-bottom)) 16px;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .copyright-footer {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      padding-top: 4px;
+      width: 100%;
+      letter-spacing: 0.2px;
+    }
+
+    .file-preview-card {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 20px;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      animation: fadeIn 0.25s ease;
+    }
+
+    .preview-thumbnail-wrap {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-thumbnail-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-file-icon {
+      color: #ef4444;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-preview-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      max-width: 180px;
+    }
+
+    .file-preview-name {
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-preview-size {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .remove-file-btn {
+      border: none;
+      background: rgba(0, 0, 0, 0.08);
+      color: #334155;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+
+    .remove-file-btn:hover {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .image-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .image-modal-overlay.open {
+      display: flex;
+    }
+
+    .image-modal-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+
+    .image-modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: -40px; right: 0;
+      background: none; border: none; color: #ffffff;
+      font-size: 28px; cursor: pointer; padding: 4px;
+    }
+
+    .input-capsule {
+      background: #ffffff;
+      border-radius: 30px;
+      padding: 6px 10px 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .add-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #475569;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .input-capsule input[type="text"] {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: transparent;
+      color: #1e293b;
+      min-width: 0;
+    }
+
+    .input-capsule input::placeholder {
+      color: #64748b;
+    }
+
+    .action-icons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .mic-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #1e293b;
+      transition: all 0.3s ease;
+    }
+
+    .mic-btn.listening {
+      background: #ef4444 !important;
+      color: #ffffff !important;
+      animation: pulseMic 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseMic {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .send-rocket-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s ease, transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .send-rocket-btn.stop-btn {
+      background: #ef4444 !important;
+    }
+
+    .icon-wrapper {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-rocket-btn #rocketIcon,
+    .send-rocket-btn #stopIcon {
+      position: absolute;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      display: block;
+    }
+
+    .send-rocket-btn #rocketIcon {
+      opacity: 1;
+      transform: scale(1) rotate(0deg) translate(-1px, 1px);
+    }
+
+    .send-rocket-btn #stopIcon {
+      opacity: 0;
+      transform: scale(0) rotate(-180deg);
+    }
+
+    .send-rocket-btn.stop-btn #rocketIcon {
+      opacity: 0 !important;
+      transform: scale(0) rotate(180deg) translate(-1px, 1px) !important;
+    }
+
+    .send-rocket-btn.stop-btn #stopIcon {
+      opacity: 1 !important;
+      transform: scale(1) rotate(0deg) !important;
+    }
+
+    .typing-cursor::after {
+      content: '▋';
+      display: inline-block;
+      animation: blink 0.8s infinite;
+      color: #2563eb;
+      margin-left: 2px;
+    }
+
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
+  <!-- 📌 สคริปต์กวาดล้างแคชอัตโนมัติ เพื่อบังคับให้เบราว์เซอร์อ่านโค้ดเวอร์ชันล่าสุดเสมอ -->
   <script>
-    // สคริปต์ทำลายแคช
     if ('caches' in window) {
       caches.keys().then((names) => {
-        for (let name of names) { caches.delete(name); }
+        for (let name of names) {
+          caches.delete(name);
+        }
       });
     }
   </script>
@@ -145,8 +877,51 @@
           <path d="M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z" fill="#1a1d20"/>
         </svg>
       </div>
-      <!-- 📌 กล่องเปลี่ยนโมเดลหายไปแล้ว เหลือแต่ชื่อแบรนด์คลีนๆ -->
+
       <span class="brand-title">AccuMate</span>
+
+      <!-- Custom Dropdown Selector -->
+      <div class="custom-dropdown-container" id="modelDropdown">
+        <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
+          <span id="selectedModelLabel">Claude Fable 5 (Kiro Pure)</span>
+          <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <div class="dropdown-menu-card">
+          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็ว) -->
+          <div class="dropdown-option-item selected" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">Claude Fable 5</span><span class="new-badge">ไวพิเศษ</span></div>
+              <span class="option-desc">Kiro Pure - รวดเร็ว สร้างสรรค์</span>
+            </div>
+          </div>
+
+          <!-- ✅ ตัวเลือกที่ 2: Opus 5 -->
+          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">Claude Opus 5</span></div>
+              <span class="option-desc">Kiro Pure - ฉลาดและแม่นยำที่สุด</span>
+            </div>
+          </div>
+
+          <!-- ✅ ตัวเลือกที่ 3: Opus 4.8 -->
+          <div class="dropdown-option-item" onclick="selectModel('claude-opus-4.8', 'Claude Opus 4.8 (Kiro Pure)', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">Claude Opus 4.8</span></div>
+              <span class="option-desc">Kiro Pure - โมเดลรุ่นก่อนหน้า เสถียร</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Right Header Actions -->
@@ -164,12 +939,15 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v3.0.0-GeminiAPI</div>
+            <div class="demo-version-tag">v1.0.4-SpeedBoost</div>
           </div>
+          
           <div class="developer-section">
             <span class="dev-label">ติดต่อผู้พัฒนา:</span>
             <a class="ig-link" href="https://www.instagram.com/porumors?igsh=MWE0Zml1eDFsdDdhdg==" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
               <span>@porumors</span>
             </a>
           </div>
@@ -182,6 +960,7 @@
     </div>
   </div>
 
+  <!-- Main App Content -->
   <div class="main-content" id="mainContent">
     <div class="welcome-hero" id="welcomeHero">
       <svg class="hero-logo-svg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -194,6 +973,7 @@
     <div class="chat-stream" id="chatStream" style="display: none;"></div>
   </div>
 
+  <!-- Modal สำหรับดูรูปพรีวิวขนาดเต็ม -->
   <div class="image-modal-overlay" id="imageModal" onclick="closeImageModal()">
     <div class="image-modal-content" onclick="event.stopPropagation()">
       <button class="close-modal-btn" onclick="closeImageModal()">✕</button>
@@ -201,6 +981,7 @@
     </div>
   </div>
 
+  <!-- Bottom Floating Capsule -->
   <div class="bottom-container" id="bottomContainer">
     <div class="file-preview-card" id="filePreviewCard">
       <div class="preview-thumbnail-wrap" id="previewThumbnailWrap" onclick="openImageModal()" style="display: none;">
@@ -240,14 +1021,14 @@
       </div>
     </div>
 
+    <!-- บรรทัดลิขสิทธิ์ภาษาอังกฤษใต้ช่องแชท -->
     <div class="copyright-footer">
       © 2026 AccuMate. All rights reserved.
     </div>
   </div>
 
 <script>
-  // 📌 คีย์ใหม่ที่เป็นของ Gemini Pool ล้วนๆ
-  const HARDCODED_API_KEY = "ccsk-e5bdce8828bedce9a3816549962e82ed3db15d7cdfae5925619924e3794d6059"; 
+  const HARDCODED_API_KEY = "ccsk-61e9f0c473d7ea0d14e293bc8c9f70755a1b98cb0f8a11489c13313c2bb68324"; 
 
   const GREETING_MESSAGES = [
     "เราจะเริ่มจากตรงไหนก่อนดี",
@@ -260,7 +1041,7 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  // 📌 System Prompt จำกัดการพร่ำเพ้อของ AI ให้ตอบตรงประเด็นเพื่อความเร็วสูงสุด
+  // 📌 System Prompt อัปเกรดเพื่อรีดความเร็วขีดสุด และบังคับภาษา
   const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
 CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
 - If the user types in English, reply ONLY in English.
@@ -277,7 +1058,6 @@ Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
 2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.`;
 
-  // 📌 ประวัติแชต โครงสร้างกลับมาเป็นแบบมาตรฐานที่เสถียรสุดของ OpenAI SDK
   let conversationHistory = [
     { role: "system", content: SYSTEM_PROMPT }
   ];
@@ -287,20 +1067,49 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 เลือก Gemini รุ่นความเร็วสูง
-  const currentSelectedModel = "gemini-3-flash";
+  // 📌 เปลี่ยนโมเดลเริ่มต้นเป็นรุ่น Fable (ความเร็วสูง)
+  let currentSelectedModel = "claude-fable-5";
 
+  // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
+    const modelDropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
+    
+    if (modelDropdown && !modelDropdown.contains(event.target)) {
+      modelDropdown.classList.remove('open');
+    }
     if (demoDropdown && !demoDropdown.contains(event.target)) {
       demoDropdown.classList.remove('open');
     }
   });
 
+  function toggleModelDropdown(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('modelDropdown');
+    const demoDropdown = document.getElementById('demoDropdown');
+    if (demoDropdown) demoDropdown.classList.remove('open');
+    dropdown.classList.toggle('open');
+  }
+
   function toggleDemoDropdown(e) {
     e.stopPropagation();
+    const dropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
+    if (dropdown) dropdown.classList.remove('open');
     demoDropdown.classList.toggle('open');
+  }
+
+  function selectModel(modelValue, modelDisplay, element) {
+    if(element.classList.contains('locked')) return;
+
+    currentSelectedModel = modelValue;
+    document.getElementById('selectedModelLabel').textContent = modelDisplay;
+    
+    const items = document.querySelectorAll('.dropdown-option-item:not(.locked)');
+    items.forEach(item => item.classList.remove('selected'));
+    element.classList.add('selected');
+
+    document.getElementById('modelDropdown').classList.remove('open');
   }
 
   let recognition = null;
@@ -470,8 +1279,8 @@ Formatting guidelines:
     if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
       return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
     }
-    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Gemini|Assistant)/gi, "$1 Accu");
-    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Gemini|Google|Anthropic|OpenAI)/gi, "AccuMate");
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
+    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
   }
 
@@ -662,7 +1471,6 @@ Formatting guidelines:
 
     let apiMessageContent = text;
 
-    // 📌 โครงสร้างรูปภาพและการส่งข้อมูลแบบ OpenAI (เข้ากันได้กับ Gemini API)
     if (fileToSend) {
       const processed = await processFileContent(fileToSend);
       if (processed.type === 'image') {
@@ -677,7 +1485,7 @@ Formatting guidelines:
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
-    // หั่นประวัติเพื่อให้เร่งสปีดสุดๆ ส่งไปแค่อันที่จำเป็น
+    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด
     let requestHistory = [conversationHistory[0]]; 
     if (conversationHistory.length > 4) {
       requestHistory.push(...conversationHistory.slice(-3));
@@ -692,22 +1500,21 @@ Formatting guidelines:
     loaderDiv.className = 'loader';
     botMsgInner.appendChild(loaderDiv);
 
-    // 📌 URL ของ Gemini Pool แบบสวมรอย (OpenAI Compatible) ตามคู่มือ
-    const targetUrl = 'https://api.maxplus-ai.cc/gemini/v1/chat/completions';
+    const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      // 📌 Payload แบบปกติเลยครับ (ง่าย เสถียร ไม่บั๊ก JSON Path)
+      // 📌 ปรับอุณหภูมิให้ตอบตรงประเด็น (ลบ keepalive ออกเพื่อกันการถูกเซิร์ฟเวอร์บล็อคการเชื่อมต่อ)
       const payload = { 
         model: selectedModel, 
         messages: requestHistory, 
-        temperature: 0.2, // ความไวแสง
-        max_tokens: 1500,
+        temperature: 0.2, 
+        max_tokens: 1024,
         stream: true 
       };
       
       const headers = { 
         'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${apiKey}`, // คีย์สำหรับเส้นทางนี้
+        'Authorization': `Bearer ${apiKey}`, 
         'x-api-key': apiKey
       };
       
@@ -716,8 +1523,7 @@ Formatting guidelines:
           method: 'POST', 
           headers, 
           body: JSON.stringify(payload), 
-          signal: currentAbortController.signal,
-          keepalive: true
+          signal: currentAbortController.signal
         });
       } catch (err) {
         if (err.name === 'AbortError') throw err;
@@ -749,9 +1555,8 @@ Formatting guidelines:
         chunk.split("\n").forEach(line => {
           if (line.startsWith("data: ")) {
             const dataStr = line.replace("data: ", "").trim();
-            if (dataStr && dataStr !== "[DONE]") {
+            if (dataStr !== "[DONE]") {
               try {
-                // 📌 แกะข้อมูลแบบเดิมที่เสถียรสุดๆ
                 const parsed = JSON.parse(dataStr);
                 const content = parsed.choices[0]?.delta?.content || "";
                 if (content) {
@@ -807,6 +1612,7 @@ Formatting guidelines:
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
+  // 📌 หลอกเบราว์เซอร์ให้โหลดไฟล์ใหม่ทุกครั้ง ป้องกันบั๊กแคชหน้าเว็บพัง
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime()).catch(err => console.log('SW fail', err));
