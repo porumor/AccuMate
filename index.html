@@ -16,17 +16,24 @@
   <!-- 📌 ฝังโลโก้ Vector (SVG) เป็น Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 500 500' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z' fill='%231a1d20'/><path d='M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z' fill='%231a1d20'/></svg>">
   
+  <!-- 📌 PWA Setup -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="./logo.svg">
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
-  <!-- Libraries -->
+  <!-- PDF.js สำหรับอ่านไฟล์ PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- Marked.js & DOMPurify สำหรับแปลง Markdown และ ตารางให้สวยงาม -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+  <!-- KaTeX สำหรับเรนเดอร์สมการคณิตศาสตร์ -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
@@ -166,7 +173,7 @@
       position: absolute;
       top: calc(100% + 8px);
       left: 0;
-      width: min(250px, 85vw);
+      width: min(240px, 80vw);
       background: #ffffff;
       border-radius: 18px;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -315,12 +322,6 @@
 
     .dropdown-option-item:hover {
       background: #f8fafc;
-    }
-
-    .dropdown-option-item.locked {
-      opacity: 0.45;
-      cursor: not-allowed;
-      background: transparent !important;
     }
 
     .option-check {
@@ -857,7 +858,7 @@
 </head>
 <body>
 
-  <!-- 📌 สคริปต์กวาดล้างแคชอัตโนมัติ เพื่อบังคับให้เบราว์เซอร์อ่านโค้ดเวอร์ชันล่าสุดเสมอ -->
+  <!-- 📌 1. สคริปต์กวาดล้างแคชอัตโนมัติ เพื่อบังคับให้เบราว์เซอร์อ่านโค้ดเวอร์ชันล่าสุดเสมอ -->
   <script>
     if ('caches' in window) {
       caches.keys().then((names) => {
@@ -868,7 +869,7 @@
     }
   </script>
 
-  <!-- Top Header Bar -->
+<!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
       <div class="header-logo-svg">
@@ -883,41 +884,38 @@
       <!-- Custom Dropdown Selector -->
       <div class="custom-dropdown-container" id="modelDropdown">
         <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
-          <span id="selectedModelLabel">Gemini 3.5 Flash</span>
+          <span id="selectedModelLabel">AccuMate Alpha</span>
           <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </button>
 
         <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Gemini 3.5 Flash (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็วขั้นสุด) -->
-          <div class="dropdown-option-item selected" onclick="selectModel('gemini-3.5-flash', 'Gemini 3.5 Flash', this)">
+          <div class="dropdown-option-item selected" onclick="selectModel('claude-sonnet-5', 'AccuMate Alpha', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Gemini 3.5 Flash</span><span class="new-badge">ไวพิเศษ</span></div>
-              <span class="option-desc">ตอบสนองรวดเร็ว ประมวลผลคล่องตัว</span>
+              <div class="option-header-row"><span class="option-title">AccuMate Alpha</span></div>
+              <span class="option-desc">สมดุลและแม่นยำที่สุด</span>
             </div>
           </div>
 
-          <!-- ✅ ตัวเลือกที่ 2: Gemini 3.6 Flash Tiered -->
-          <div class="dropdown-option-item" onclick="selectModel('gemini-3.6-flash-tiered', 'Gemini 3.6 Flash Tiered', this)">
+          <div class="dropdown-option-item" onclick="selectModel('claude-fable-5', 'AccuMate Flash', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Gemini 3.6 Flash Tiered</span></div>
-              <span class="option-desc">สมดุลระหว่างความเร็วและความแม่นยำ</span>
+              <div class="option-header-row"><span class="option-title">AccuMate Flash</span><span class="new-badge">ไวพิเศษ</span></div>
+              <span class="option-desc">รวดเร็ว งานสร้างสรรค์</span>
             </div>
           </div>
 
-          <!-- ✅ ตัวเลือกที่ 3: Gemini 3.1 Pro Preview -->
-          <div class="dropdown-option-item" onclick="selectModel('gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview', this)">
+          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'AccuMate Ultra', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Gemini 3.1 Pro Preview</span></div>
-              <span class="option-desc">คิดคำนวณขั้นสูงและงานซับซ้อน</span>
+              <div class="option-header-row"><span class="option-title">AccuMate Ultra</span></div>
+              <span class="option-desc">โจทย์ซับซ้อนและคิดคำนวณขั้นสูง</span>
             </div>
           </div>
         </div>
@@ -939,7 +937,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.5-GeminiStable</div>
+            <div class="demo-version-tag">v1.0.1</div>
           </div>
           
           <div class="developer-section">
@@ -1028,7 +1026,8 @@
   </div>
 
 <script>
-  const HARDCODED_API_KEY = "ccsk-61e9f0c473d7ea0d14e293bc8c9f70755a1b98cb0f8a11489c13313c2bb68324"; 
+  // 📌 เปลี่ยน API Key ตรงนี้
+  const HARDCODED_API_KEY = "ccsk-e5bdce8828bedce9a3816549962e82ed3db15d7cdfae5925619924e3794d6059"; 
 
   const GREETING_MESSAGES = [
     "เราจะเริ่มจากตรงไหนก่อนดี",
@@ -1041,22 +1040,12 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  // 📌 System Prompt อัปเกรดเพื่อรีดความเร็วขีดสุด และบังคับภาษา
-  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
-CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
-- If the user types in English, reply ONLY in English.
-- If the user types in Thai, reply ONLY in Thai.
-
-⚡ SPEED OPTIMIZATION RULE (CRITICAL):
-To maximize response speed, you MUST be EXTREMELY CONCISE and direct. 
-- Skip long introductions (Do not say "นี่คือคำตอบ..." or "Certainly!").
-- Omit unnecessary polite fluff.
-- Get straight to the point immediately.
-- Use bullet points for quick reading.
-
+  const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. 
+CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses. 
 Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
-2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.`;
+2. If presenting comparisons, lists, or structured data, ALWAYS render them in Markdown Tables.
+3. Keep the tone helpful, professional, and neat.`;
 
   let conversationHistory = [
     { role: "system", content: SYSTEM_PROMPT }
@@ -1066,9 +1055,7 @@ Formatting guidelines:
   let currentImagePreviewUrl = null;
   let isGenerating = false;
   let currentAbortController = null;
-  
-  // 📌 ตั้งค่าเริ่มต้นเป็น gemini-3.5-flash เพื่อสปีดความไวสูงสุด
-  let currentSelectedModel = "gemini-3.5-flash";
+  let currentSelectedModel = "claude-sonnet-5";
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
@@ -1100,12 +1087,10 @@ Formatting guidelines:
   }
 
   function selectModel(modelValue, modelDisplay, element) {
-    if(element.classList.contains('locked')) return;
-
     currentSelectedModel = modelValue;
     document.getElementById('selectedModelLabel').textContent = modelDisplay;
     
-    const items = document.querySelectorAll('.dropdown-option-item:not(.locked)');
+    const items = document.querySelectorAll('.dropdown-option-item');
     items.forEach(item => item.classList.remove('selected'));
     element.classList.add('selected');
 
@@ -1248,7 +1233,7 @@ Formatting guidelines:
     const hasStartedChatting = conversationHistory.length > 1 || isGenerating;
     
     if (hasStartedChatting) {
-      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความปัจจุบันจะหายไป)");
+      const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความจะหายไป)");
       if (!confirmReset) return;
     } else {
       return; 
@@ -1279,8 +1264,8 @@ Formatting guidelines:
     if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
       return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
     }
-    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant|Gemini)/gi, "$1 Accu");
-    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI|Google Gemini)/gi, "AccuMate");
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
+    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
   }
 
@@ -1485,12 +1470,9 @@ Formatting guidelines:
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
-    // 📌 หั่นประวัติการสนทนาเพื่อรีดสปีดการประมวลผลของ AI ให้เร็วที่สุด
-    let requestHistory = [conversationHistory[0]]; 
-    if (conversationHistory.length > 4) {
-      requestHistory.push(...conversationHistory.slice(-3));
-    } else {
-      requestHistory.push(...conversationHistory.slice(1));
+    let requestHistory = conversationHistory;
+    if (conversationHistory.length > 7) {
+      requestHistory = [conversationHistory[0], ...conversationHistory.slice(-6)];
     }
 
     const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
@@ -1503,27 +1485,10 @@ Formatting guidelines:
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      const payload = { 
-        model: selectedModel, 
-        messages: requestHistory, 
-        temperature: 0.2, 
-        max_tokens: 1024,
-        stream: true 
-      };
-      
-      const headers = { 
-        'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${apiKey}`, 
-        'x-api-key': apiKey
-      };
-      
+      const payload = { model: selectedModel, messages: requestHistory, temperature: 0.5, stream: true };
+      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'x-api-key': apiKey };
       try {
-        return await fetch(targetUrl, { 
-          method: 'POST', 
-          headers, 
-          body: JSON.stringify(payload), 
-          signal: currentAbortController.signal
-        });
+        return await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
       } catch (err) {
         if (err.name === 'AbortError') throw err;
         const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
@@ -1611,7 +1576,7 @@ Formatting guidelines:
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 หลอกเบราว์เซอร์ให้โหลดไฟล์ใหม่ทุกครั้ง ป้องกันบั๊กแคชหน้าเว็บพัง
+  // 📌 5. ลงทะเบียน Service Worker เพื่อบังคับเคลียร์แคช
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime()).catch(err => console.log('SW fail', err));
