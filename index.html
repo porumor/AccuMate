@@ -4,34 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-  <!-- 📌 1. บังคับเบราว์เซอร์ไม่ให้จำแคช (No-Cache Meta Tags) -->
+  <!-- ⚡ ระบบทำลายแคช + ท่อด่วน (Preconnect) ให้ต่อ API ไวขึ้น -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <link rel="preconnect" href="https://api.maxplus-ai.cc" crossorigin>
+  <link rel="dns-prefetch" href="https://api.maxplus-ai.cc">
 
   <title>AccuMate</title>
   
   <!-- 📌 ฝังโลโก้ Vector (SVG) เป็น Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 500 500' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M 250,55 C 215,55 190,80 170,120 L 58,358 C 48,379 50,400 66,400 L 138,400 C 148,400 157,392 162,381 L 250,195 L 338,381 C 343,392 352,400 362,400 L 434,400 C 450,400 452,379 442,358 L 330,120 C 310,80 285,55 250,55 Z' fill='%231a1d20'/><path d='M 222,400 L 294,400 C 304,400 313,392 318,381 L 288,318 C 283,307 272,300 260,300 L 222,380 C 215,395 220,400 222,400 Z' fill='%231a1d20'/></svg>">
   
-  <!-- 📌 PWA Setup -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="./logo.svg">
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
-  <!-- PDF.js สำหรับอ่านไฟล์ PDF -->
+  <!-- Libraries (ดึงจาก CDN ที่ไวที่สุด) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
-
-  <!-- Marked.js & DOMPurify สำหรับแปลง Markdown และ ตารางให้สวยงาม -->
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-
-  <!-- KaTeX สำหรับเรนเดอร์สมการคณิตศาสตร์ -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
@@ -429,7 +424,7 @@
       flex-direction: column;
       width: 100%;
       margin-bottom: 12px;
-      animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: messageSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes messageSlideIn {
@@ -487,7 +482,7 @@
       border-radius: 6px;
       opacity: 0;
       transform: translateY(6px);
-      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+      transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s;
     }
 
     .copy-action-btn.show {
@@ -570,7 +565,7 @@
       position: absolute;
       border-radius: 50px;
       box-shadow: 0 0 0 3px inset #0f172a;
-      animation: l3 0.75s infinite alternate;
+      animation: l3 0.6s infinite alternate;
     }
     @keyframes l3 {
       0% { inset: 0 35px 0 0; }
@@ -609,7 +604,7 @@
       width: fit-content;
       max-width: 100%;
       border: 1px solid rgba(226, 232, 240, 0.8);
-      animation: fadeIn 0.25s ease;
+      animation: fadeIn 0.2s ease;
     }
 
     .preview-thumbnail-wrap {
@@ -804,7 +799,7 @@
       padding: 0;
       position: relative;
       overflow: hidden;
-      transition: background 0.3s ease, transform 0.2s ease;
+      transition: background 0.2s ease, transform 0.2s ease;
       flex-shrink: 0;
     }
 
@@ -862,7 +857,7 @@
 </head>
 <body>
 
-  <!-- 📌 2. รันสคริปต์ล้างแคชทันทีก่อนโหลดหน้าแอป -->
+  <!-- 📌 สคริปต์กวาดล้างแคชอัตโนมัติ เพื่อบังคับให้เบราว์เซอร์อ่านโค้ดเวอร์ชันล่าสุดเสมอ -->
   <script>
     if ('caches' in window) {
       caches.keys().then((names) => {
@@ -888,30 +883,30 @@
       <!-- Custom Dropdown Selector -->
       <div class="custom-dropdown-container" id="modelDropdown">
         <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
-          <span id="selectedModelLabel">Claude Opus 5 (Kiro Pure)</span>
+          <span id="selectedModelLabel">Claude Fable 5 (Kiro Pure)</span>
           <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </button>
 
         <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Opus 5 (ค่าเริ่มต้น) -->
-          <div class="dropdown-option-item selected" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
+          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็วขั้นสุด) -->
+          <div class="dropdown-option-item selected" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
+            <div class="option-check">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="option-content">
+              <div class="option-header-row"><span class="option-title">Claude Fable 5</span><span class="new-badge">ไวพิเศษ</span></div>
+              <span class="option-desc">Kiro Pure - รวดเร็ว สร้างสรรค์</span>
+            </div>
+          </div>
+
+          <!-- ✅ ตัวเลือกที่ 2: Opus 5 -->
+          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
               <div class="option-header-row"><span class="option-title">Claude Opus 5</span></div>
               <span class="option-desc">Kiro Pure - ฉลาดและแม่นยำที่สุด</span>
-            </div>
-          </div>
-
-          <!-- ✅ ตัวเลือกที่ 2: Fable 5 -->
-          <div class="dropdown-option-item" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Fable 5</span></div>
-              <span class="option-desc">Kiro Pure - รวดเร็ว สร้างสรรค์</span>
             </div>
           </div>
 
@@ -944,7 +939,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.1</div>
+            <div class="demo-version-tag">v1.0.2-Fast</div>
           </div>
           
           <div class="developer-section">
@@ -1046,14 +1041,11 @@
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
 
-  const SYSTEM_PROMPT = `You are Accu, an advanced AI assistant for AccuMate. You can understand and communicate intelligently in any language.
-CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses in their prompt. 
-- If the user types in English, reply ONLY in English.
-- If the user types in Thai, reply ONLY in Thai.
-- If the user types in Japanese, reply ONLY in Japanese.
+  const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. 
+CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses. 
 Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
-2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.
+2. If presenting comparisons, lists, or structured data, ALWAYS render them in Markdown Tables.
 3. Keep the tone helpful, professional, and neat.`;
 
   let conversationHistory = [
@@ -1065,8 +1057,8 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 4. เปลี่ยนโมเดลเริ่มต้นกลับไปเป็น Claude Opus 5
-  let currentSelectedModel = "claude-opus-5";
+  // 📌 เปลี่ยนโมเดลค่าเริ่มต้นเป็นรุ่นความเร็วสูง (Fable)
+  let currentSelectedModel = "claude-fable-5";
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
@@ -1483,9 +1475,12 @@ Formatting guidelines:
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
-    let requestHistory = conversationHistory;
-    if (conversationHistory.length > 7) {
-      requestHistory = [conversationHistory[0], ...conversationHistory.slice(-6)];
+    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด ส่งไปแค่ 2-3 อันล่าสุด
+    let requestHistory = [conversationHistory[0]]; 
+    if (conversationHistory.length > 3) {
+      requestHistory.push(...conversationHistory.slice(-3));
+    } else {
+      requestHistory.push(...conversationHistory.slice(1));
     }
 
     const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
@@ -1498,10 +1493,30 @@ Formatting guidelines:
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      const payload = { model: selectedModel, messages: requestHistory, temperature: 0.5, stream: true };
-      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'x-api-key': apiKey };
+      // 📌 ปรับจูนความไวด้วย Temperature และบอกเบราว์เซอร์ให้เปิดการเชื่อมต่อรอไว้
+      const payload = { 
+        model: selectedModel, 
+        messages: requestHistory, 
+        temperature: 0.2, // ลดความสร้างสรรค์ = AI คิดและตอบกลับไวขึ้น 
+        max_tokens: 1024, // ควบคุมการจำกัดปริมาณคำ
+        stream: true 
+      };
+      
+      const headers = { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${apiKey}`, 
+        'x-api-key': apiKey,
+        'Accept': 'text/event-stream' // แจ้งเซิร์ฟเวอร์ว่าจะรับข้อมูลแบบสตรีมรวดเร็ว
+      };
+      
       try {
-        return await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
+        return await fetch(targetUrl, { 
+          method: 'POST', 
+          headers, 
+          body: JSON.stringify(payload), 
+          signal: currentAbortController.signal,
+          keepalive: true // 📌 ท่อด่วน: รักษาสถานะเชื่อมต่อกับ API
+        });
       } catch (err) {
         if (err.name === 'AbortError') throw err;
         const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
@@ -1589,10 +1604,9 @@ Formatting guidelines:
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 5. ลงทะเบียน Service Worker เพื่อบังคับเคลียร์แคช (Bypass Cache)
+  // 📌 หลอกเบราว์เซอร์ให้โหลดไฟล์ใหม่ทุกครั้ง ป้องกันบั๊กแคชหน้าเว็บพัง
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      // เติม ?v= เพื่อบังคับโหลดไฟล์ใหม่เสมอ
       navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime()).catch(err => console.log('SW fail', err));
     });
   }
