@@ -22,7 +22,7 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
-  <!-- Libraries (ดึงจาก CDN ที่ไวที่สุด) -->
+  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -126,67 +126,10 @@
       justify-content: center;
       padding: 4px;
     }
-    
-    .custom-dropdown-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-trigger-btn {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #334155;
-      background: rgba(241, 245, 249, 0.8);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      outline: none;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 10px;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .dropdown-trigger-btn:hover {
-      background: rgba(241, 245, 249, 1);
-    }
 
     .dropdown-arrow {
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       flex-shrink: 0;
-    }
-
-    .custom-dropdown-container.open .dropdown-arrow {
-      transform: rotate(180deg);
-    }
-
-    .dropdown-menu-card {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      width: min(240px, 80vw);
-      background: #ffffff;
-      border-radius: 18px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      padding: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      z-index: 200;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-12px) scale(0.95);
-      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
-      transform-origin: top left;
-    }
-
-    .custom-dropdown-container.open .dropdown-menu-card {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
     }
 
     .demo-dropdown-wrap {
@@ -211,6 +154,10 @@
 
     .demo-text-btn:hover {
       opacity: 0.8;
+    }
+
+    .demo-dropdown-wrap.open .dropdown-arrow {
+      transform: rotate(180deg);
     }
 
     .demo-menu-card {
@@ -301,75 +248,6 @@
       width: 13px;
       height: 13px;
       fill: #e1306c;
-    }
-
-    .dropdown-option-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 6px 8px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .dropdown-option-item:hover {
-      background: #f8fafc;
-    }
-
-    .dropdown-option-item.locked {
-      opacity: 0.45;
-      cursor: not-allowed;
-      background: transparent !important;
-    }
-
-    .option-check {
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-      visibility: hidden;
-      color: #0f172a;
-    }
-
-    .dropdown-option-item.selected .option-check {
-      visibility: visible;
-    }
-
-    .option-content {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-
-    .option-header-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .option-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: #1e293b;
-    }
-
-    .new-badge {
-      font-size: 9.5px;
-      font-weight: 400;
-      color: #475569;
-      background: #f1f5f9;
-      padding: 1px 5px;
-      border-radius: 8px;
-    }
-
-    .option-desc {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 1px;
     }
 
     .main-content {
@@ -604,7 +482,7 @@
       width: fit-content;
       max-width: 100%;
       border: 1px solid rgba(226, 232, 240, 0.8);
-      animation: fadeIn 0.25s ease;
+      animation: fadeIn 0.2s ease;
     }
 
     .preview-thumbnail-wrap {
@@ -879,49 +757,6 @@
       </div>
 
       <span class="brand-title">AccuMate</span>
-
-      <!-- Custom Dropdown Selector -->
-      <div class="custom-dropdown-container" id="modelDropdown">
-        <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
-          <span id="selectedModelLabel">Claude Fable 5 (Kiro Pure)</span>
-          <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-
-        <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็ว) -->
-          <div class="dropdown-option-item selected" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Fable 5</span><span class="new-badge">ไวพิเศษ</span></div>
-              <span class="option-desc">Kiro Pure - รวดเร็ว สร้างสรรค์</span>
-            </div>
-          </div>
-
-          <!-- ✅ ตัวเลือกที่ 2: Opus 5 -->
-          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Opus 5</span></div>
-              <span class="option-desc">Kiro Pure - ฉลาดและแม่นยำที่สุด</span>
-            </div>
-          </div>
-
-          <!-- ✅ ตัวเลือกที่ 3: Opus 4.8 -->
-          <div class="dropdown-option-item" onclick="selectModel('claude-opus-4.8', 'Claude Opus 4.8 (Kiro Pure)', this)">
-            <div class="option-check">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Opus 4.8</span></div>
-              <span class="option-desc">Kiro Pure - โมเดลรุ่นก่อนหน้า เสถียร</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Right Header Actions -->
@@ -939,7 +774,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.3-Fast</div>
+            <div class="demo-version-tag">v2.0.1-Gemini-Native</div>
           </div>
           
           <div class="developer-section">
@@ -1028,7 +863,8 @@
   </div>
 
 <script>
-  const HARDCODED_API_KEY = "ccsk-61e9f0c473d7ea0d14e293bc8c9f70755a1b98cb0f8a11489c13313c2bb68324"; 
+  // 📌 นำคีย์ใหม่มาฝังตรงนี้เรียบร้อยครับ
+  const HARDCODED_API_KEY = "ccsk-e5bdce8828bedce9a3816549962e82ed3db15d7cdfae5925619924e3794d6059"; 
 
   const GREETING_MESSAGES = [
     "เราจะเริ่มจากตรงไหนก่อนดี",
@@ -1058,58 +894,29 @@ Formatting guidelines:
 1. Format your response cleanly using Standard Markdown.
 2. If presenting comparisons, lists, or structured data, ALWAYS render them in clear, clean Markdown Tables.`;
 
-  let conversationHistory = [
-    { role: "system", content: SYSTEM_PROMPT }
-  ];
+  // เก็บเฉพาะเนื้อหาการคุย (ตามโครงสร้าง Gemini Native)
+  let conversationHistory = [];
 
   let selectedFile = null;
   let currentImagePreviewUrl = null;
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 เปลี่ยนโมเดลเริ่มต้นเป็นรุ่น Fable (ความเร็วสูง)
-  let currentSelectedModel = "claude-fable-5";
+  // 📌 โมเดลล็อกเป็นตัวความเร็วสูง (Gemini Native)
+  const currentSelectedModel = "gemini-3-flash";
 
-  // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
+  // ดักจับการคลิกนอกกรอบเพื่อปิดดรอปดาวน์ Demo
   document.addEventListener('click', function(event) {
-    const modelDropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
-    
-    if (modelDropdown && !modelDropdown.contains(event.target)) {
-      modelDropdown.classList.remove('open');
-    }
     if (demoDropdown && !demoDropdown.contains(event.target)) {
       demoDropdown.classList.remove('open');
     }
   });
 
-  function toggleModelDropdown(e) {
-    e.stopPropagation();
-    const dropdown = document.getElementById('modelDropdown');
-    const demoDropdown = document.getElementById('demoDropdown');
-    if (demoDropdown) demoDropdown.classList.remove('open');
-    dropdown.classList.toggle('open');
-  }
-
   function toggleDemoDropdown(e) {
     e.stopPropagation();
-    const dropdown = document.getElementById('modelDropdown');
     const demoDropdown = document.getElementById('demoDropdown');
-    if (dropdown) dropdown.classList.remove('open');
     demoDropdown.classList.toggle('open');
-  }
-
-  function selectModel(modelValue, modelDisplay, element) {
-    if(element.classList.contains('locked')) return;
-
-    currentSelectedModel = modelValue;
-    document.getElementById('selectedModelLabel').textContent = modelDisplay;
-    
-    const items = document.querySelectorAll('.dropdown-option-item:not(.locked)');
-    items.forEach(item => item.classList.remove('selected'));
-    element.classList.add('selected');
-
-    document.getElementById('modelDropdown').classList.remove('open');
   }
 
   let recognition = null;
@@ -1245,7 +1052,7 @@ Formatting guidelines:
   }
 
   function startNewChat() {
-    const hasStartedChatting = conversationHistory.length > 1 || isGenerating;
+    const hasStartedChatting = conversationHistory.length > 0 || isGenerating;
     
     if (hasStartedChatting) {
       const confirmReset = confirm("ต้องการเริ่มแชตใหม่ใช่หรือไม่? (ประวัติข้อความปัจจุบันจะหายไป)");
@@ -1257,9 +1064,8 @@ Formatting guidelines:
     if (isGenerating && currentAbortController) currentAbortController.abort();
     stopSpeechRecognition();
     
-    conversationHistory = [
-      { role: "system", content: SYSTEM_PROMPT }
-    ];
+    // เคลียร์ประวัติ
+    conversationHistory = [];
     
     clearSelectedFile();
     const chatStream = document.getElementById('chatStream');
@@ -1279,8 +1085,8 @@ Formatting guidelines:
     if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
       return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
     }
-    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
-    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Gemini|Assistant)/gi, "$1 Accu");
+    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Gemini|Google|Anthropic|OpenAI)/gi, "AccuMate");
     return cleanText;
   }
 
@@ -1469,28 +1275,36 @@ Formatting guidelines:
     inputEl.value = '';
     clearSelectedFile();
 
-    let apiMessageContent = text;
+    // 📌 แปลงโครงสร้างข้อมูลให้ตรงกับ Gemini Native REST Shape
+    let apiMessageParts = [];
 
     if (fileToSend) {
       const processed = await processFileContent(fileToSend);
       if (processed.type === 'image') {
-        apiMessageContent = [
-          { type: "text", text: text || "วิเคราะห์ภาพนี้" },
-          { type: "image_url", image_url: { url: processed.dataUrl } }
-        ];
+        // สำหรับรูปภาพ Gemini Native รับแบบ base64 ใน inlineData
+        apiMessageParts.push({ text: text || "วิเคราะห์ภาพนี้" });
+        const base64Data = processed.dataUrl.split(',')[1];
+        apiMessageParts.push({
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Data
+          }
+        });
       } else if (processed.type === 'text') {
-        apiMessageContent = `[ไฟล์: ${fileToSend.name}]\n${processed.content}\n\n${text}`;
+        apiMessageParts.push({ text: `[ไฟล์: ${fileToSend.name}]\n${processed.content}\n\n${text}` });
       }
+    } else {
+      apiMessageParts.push({ text: text });
     }
 
-    conversationHistory.push({ role: "user", content: apiMessageContent });
+    conversationHistory.push({ role: "user", parts: apiMessageParts });
 
-    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด ส่งไปแค่ประโยคตั้งต้น และ 3 ประโยคล่าสุด
-    let requestHistory = [conversationHistory[0]]; 
-    if (conversationHistory.length > 4) {
-      requestHistory.push(...conversationHistory.slice(-3));
+    // หั่นประวัติ (จำกัดการจำข้อความล่าสุดเพื่อให้ประมวลผลไวขึ้น)
+    let requestHistory = []; 
+    if (conversationHistory.length > 5) {
+      requestHistory = conversationHistory.slice(-5);
     } else {
-      requestHistory.push(...conversationHistory.slice(1));
+      requestHistory = [...conversationHistory];
     }
 
     const { containerDiv: botMsgDiv, contentContainer: contentSpan, copyBtn: botCopyBtn, msgDiv: botMsgInner } = appendMessage('bot', '');
@@ -1500,38 +1314,33 @@ Formatting guidelines:
     loaderDiv.className = 'loader';
     botMsgInner.appendChild(loaderDiv);
 
-    const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
+    // 📌 ใช้ URL ของโหมด Native + alt=sse สำหรับสตรีมเรียลไทม์
+    const targetUrl = `https://api.maxplus-ai.cc/v1beta/models/${selectedModel}:streamGenerateContent?alt=sse`;
 
     async function makeRequest() {
-      // 📌 ปรับอุณหภูมิ (Temperature) ให้เน้นตอบตรงประเด็นและไวที่สุด ไม่ต้องคิดคำยาวๆ
+      // 📌 โครงสร้าง Payload รูปแบบใหม่สำหรับ Gemini โดยใช้ System Prompt เพื่อรีดความไว
       const payload = { 
-        model: selectedModel, 
-        messages: requestHistory, 
-        temperature: 0.2, 
-        max_tokens: 1024,
-        stream: true 
+        systemInstruction: {
+          parts: [{ text: SYSTEM_PROMPT }]
+        },
+        contents: requestHistory, 
+        generationConfig: {
+          temperature: 0.2, 
+          maxOutputTokens: 1024
+        }
       };
       
       const headers = { 
         'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${apiKey}`, 
-        'x-api-key': apiKey,
-        'Accept': 'text/event-stream' // แจ้งเซิร์ฟเวอร์ว่าจะรับข้อมูลแบบสตรีมรวดเร็ว
+        'x-goog-api-key': apiKey // 📌 เปลี่ยน Header สำหรับ Native
       };
       
-      try {
-        return await fetch(targetUrl, { 
-          method: 'POST', 
-          headers, 
-          body: JSON.stringify(payload), 
-          signal: currentAbortController.signal,
-          keepalive: true // 📌 ท่อด่วน: รักษาสถานะเชื่อมต่อกับ API
-        });
-      } catch (err) {
-        if (err.name === 'AbortError') throw err;
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-        return await fetch(proxyUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
-      }
+      return await fetch(targetUrl, { 
+        method: 'POST', 
+        headers, 
+        body: JSON.stringify(payload), 
+        signal: currentAbortController.signal
+      });
     }
 
     let rawReply = "";
@@ -1557,10 +1366,11 @@ Formatting guidelines:
         chunk.split("\n").forEach(line => {
           if (line.startsWith("data: ")) {
             const dataStr = line.replace("data: ", "").trim();
-            if (dataStr !== "[DONE]") {
+            if (dataStr && dataStr !== "[DONE]") {
               try {
+                // 📌 วิธีแกะกล่องข้อมูลจาก Gemini Native (JSON Path)
                 const parsed = JSON.parse(dataStr);
-                const content = parsed.choices[0]?.delta?.content || "";
+                const content = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
                 if (content) {
                   if (isFirstChunk) {
                     loaderDiv.remove();
@@ -1583,7 +1393,8 @@ Formatting guidelines:
       botCopyBtn.onclick = () => copyTextToClipboard(rawReply, botCopyBtn);
       botCopyBtn.classList.add('show');
 
-      conversationHistory.push({ role: "assistant", content: rawReply });
+      // 📌 บันทึกประวัติตอบกลับในรูปแบบ Gemini Native
+      conversationHistory.push({ role: "model", parts: [{ text: rawReply }] });
     } catch (error) {
       if (loaderDiv) loaderDiv.remove();
       if (botMsgInner) {
@@ -1595,7 +1406,7 @@ Formatting guidelines:
           renderFormattedText(contentSpan, rawReply);
           botCopyBtn.onclick = () => copyTextToClipboard(rawReply, botCopyBtn);
           botCopyBtn.classList.add('show');
-          conversationHistory.push({ role: "assistant", content: rawReply });
+          conversationHistory.push({ role: "model", parts: [{ text: rawReply }] });
         } else {
           contentSpan.textContent = 'หยุดการสร้างคำตอบชั่วคราวแล้ว';
           botCopyBtn.onclick = () => copyTextToClipboard('หยุดการสร้างคำตอบชั่วคราวแล้ว', botCopyBtn);
@@ -1614,7 +1425,7 @@ Formatting guidelines:
     if (event.key === 'Enter' && !isGenerating) sendMessage();
   }
 
-  // 📌 หลอกเบราว์เซอร์ให้โหลดไฟล์ใหม่ทุกครั้ง ป้องกันบั๊กแคชหน้าเว็บพัง
+  // ลงทะเบียน Service Worker 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime()).catch(err => console.log('SW fail', err));
