@@ -166,7 +166,7 @@
       position: absolute;
       top: calc(100% + 8px);
       left: 0;
-      width: min(240px, 80vw);
+      width: min(250px, 85vw);
       background: #ffffff;
       border-radius: 18px;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -883,41 +883,41 @@
       <!-- Custom Dropdown Selector -->
       <div class="custom-dropdown-container" id="modelDropdown">
         <button class="dropdown-trigger-btn" onclick="toggleModelDropdown(event)">
-          <span id="selectedModelLabel">Claude Fable 5 (Kiro Pure)</span>
+          <span id="selectedModelLabel">Gemini 3.5 Flash</span>
           <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </button>
 
         <div class="dropdown-menu-card">
-          <!-- ✅ ตัวเลือกที่ 1: Fable 5 (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็ว) -->
-          <div class="dropdown-option-item selected" onclick="selectModel('claude-fable-5', 'Claude Fable 5 (Kiro Pure)', this)">
+          <!-- ✅ ตัวเลือกที่ 1: Gemini 3.5 Flash (ตั้งเป็นค่าเริ่มต้น เพื่อความเร็วขั้นสุด) -->
+          <div class="dropdown-option-item selected" onclick="selectModel('gemini-3.5-flash', 'Gemini 3.5 Flash', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Fable 5</span><span class="new-badge">ไวพิเศษ</span></div>
-              <span class="option-desc">Kiro Pure - รวดเร็ว สร้างสรรค์</span>
+              <div class="option-header-row"><span class="option-title">Gemini 3.5 Flash</span><span class="new-badge">ไวพิเศษ</span></div>
+              <span class="option-desc">ตอบสนองรวดเร็ว ประมวลผลคล่องตัว</span>
             </div>
           </div>
 
-          <!-- ✅ ตัวเลือกที่ 2: Opus 5 -->
-          <div class="dropdown-option-item" onclick="selectModel('claude-opus-5', 'Claude Opus 5 (Kiro Pure)', this)">
+          <!-- ✅ ตัวเลือกที่ 2: Gemini 3.6 Flash Tiered -->
+          <div class="dropdown-option-item" onclick="selectModel('gemini-3.6-flash-tiered', 'Gemini 3.6 Flash Tiered', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Opus 5</span></div>
-              <span class="option-desc">Kiro Pure - ฉลาดและแม่นยำที่สุด</span>
+              <div class="option-header-row"><span class="option-title">Gemini 3.6 Flash Tiered</span></div>
+              <span class="option-desc">สมดุลระหว่างความเร็วและความแม่นยำ</span>
             </div>
           </div>
 
-          <!-- ✅ ตัวเลือกที่ 3: Opus 4.8 -->
-          <div class="dropdown-option-item" onclick="selectModel('claude-opus-4.8', 'Claude Opus 4.8 (Kiro Pure)', this)">
+          <!-- ✅ ตัวเลือกที่ 3: Gemini 3.1 Pro Preview -->
+          <div class="dropdown-option-item" onclick="selectModel('gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview', this)">
             <div class="option-check">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="option-content">
-              <div class="option-header-row"><span class="option-title">Claude Opus 4.8</span></div>
-              <span class="option-desc">Kiro Pure - โมเดลรุ่นก่อนหน้า เสถียร</span>
+              <div class="option-header-row"><span class="option-title">Gemini 3.1 Pro Preview</span></div>
+              <span class="option-desc">คิดคำนวณขั้นสูงและงานซับซ้อน</span>
             </div>
           </div>
         </div>
@@ -939,7 +939,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.4-SpeedBoost</div>
+            <div class="demo-version-tag">v1.0.5-GeminiStable</div>
           </div>
           
           <div class="developer-section">
@@ -1067,8 +1067,8 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   
-  // 📌 เปลี่ยนโมเดลเริ่มต้นเป็นรุ่น Fable (ความเร็วสูง)
-  let currentSelectedModel = "claude-fable-5";
+  // 📌 ตั้งค่าเริ่มต้นเป็น gemini-3.5-flash เพื่อสปีดความไวสูงสุด
+  let currentSelectedModel = "gemini-3.5-flash";
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
@@ -1279,8 +1279,8 @@ Formatting guidelines:
     if (cleanText.includes("ขอชี้แจง") || cleanText.includes("ไม่สามารถรับบท")) {
       return "สวัสดีครับผม Accu ผู้ช่วย AI ของแพลตฟอร์ม AccuMate มีอะไรให้ผมช่วยดูแลวันนี้ไหมครับ?";
     }
-    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant)/gi, "$1 Accu");
-    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI)/gi, "AccuMate");
+    cleanText = cleanText.replace(/(ผมชื่อ|My name is|I am|ฉันชื่อ)\s*(Kiro|Claude|ChatGPT|GPT|Assistant|Gemini)/gi, "$1 Accu");
+    cleanText = cleanText.replace(/(Kiro|Claude|ChatGPT|Anthropic|OpenAI|Google Gemini)/gi, "AccuMate");
     return cleanText;
   }
 
@@ -1485,7 +1485,7 @@ Formatting guidelines:
 
     conversationHistory.push({ role: "user", content: apiMessageContent });
 
-    // 📌 หั่นประวัติแบบหฤโหด (Aggressive Truncation) เพื่อรีดความเร็วขีดสุด
+    // 📌 หั่นประวัติการสนทนาเพื่อรีดสปีดการประมวลผลของ AI ให้เร็วที่สุด
     let requestHistory = [conversationHistory[0]]; 
     if (conversationHistory.length > 4) {
       requestHistory.push(...conversationHistory.slice(-3));
@@ -1503,7 +1503,6 @@ Formatting guidelines:
     const targetUrl = 'https://api.maxplus-ai.cc/v1/chat/completions';
 
     async function makeRequest() {
-      // 📌 ปรับอุณหภูมิให้ตอบตรงประเด็น (ลบ keepalive ออกเพื่อกันการถูกเซิร์ฟเวอร์บล็อคการเชื่อมต่อ)
       const payload = { 
         model: selectedModel, 
         messages: requestHistory, 
