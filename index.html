@@ -83,6 +83,42 @@
       opacity: 0;
     }
 
+    /* 👑 VIP Mode Ambient & Gold Logo Styles */
+    body.vip-mode::before {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 20%, #ffd1ff 40%, #a1c4fd 60%, #c2e9fb 80%, #ffecd2 100%) !important;
+      background-size: 400% 400% !important;
+      animation: rainbowAmbient 12s ease infinite !important;
+      opacity: 1 !important;
+    }
+
+    @keyframes rainbowAmbient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body.vip-mode .hero-logo-svg path,
+    body.vip-mode .header-logo-svg path {
+      fill: #d4af37 !important;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
+      transition: all 0.5s ease;
+    }
+
+    body.vip-mode .brand-title {
+      background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+      text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    }
+
+    body.vip-mode .vip-btn {
+      background: linear-gradient(135deg, #d4af37, #aa771c) !important;
+      color: #ffffff !important;
+      border: 1px solid #fcf6ba !important;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    }
+
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -132,6 +168,104 @@
       align-items: center;
       justify-content: center;
       padding: 4px;
+    }
+
+    /* 👑 VIP Host Button Style */
+    .vip-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #b45309;
+      background: rgba(254, 243, 199, 0.8);
+      border: 1px solid rgba(252, 211, 77, 0.8);
+      padding: 4px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .vip-btn:hover {
+      background: rgba(253, 230, 138, 1);
+    }
+
+    /* 👑 VIP Modal Styles */
+    .vip-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .vip-modal-overlay.open { display: flex; }
+    .vip-modal-card {
+      background: #ffffff;
+      width: min(320px, 90vw);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .vip-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .vip-modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      outline: none;
+    }
+    .vip-modal-input:focus {
+      border-color: #d4af37;
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+    .vip-modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .vip-submit-btn {
+      flex: 1;
+      background: #d4af37;
+      color: #fff;
+      border: none;
+      padding: 8px;
+      border-radius: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .vip-submit-btn:hover { opacity: 0.9; }
+    .vip-cancel-btn {
+      flex: 1;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 8px;
+      border-radius: 10px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .vip-error-msg {
+      font-size: 11.5px;
+      color: #ef4444;
+      display: none;
+      text-align: center;
     }
     
     .custom-dropdown-container {
@@ -688,24 +822,18 @@
       padding: 20px;
       animation: fadeIn 0.2s ease;
     }
-
-    .image-modal-overlay.open {
-      display: flex;
-    }
-
+    .image-modal-overlay.open { display: flex; }
     .image-modal-content {
       position: relative;
       max-width: 90vw;
       max-height: 90vh;
     }
-
     .image-modal-content img {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 12px;
       object-fit: contain;
     }
-
     .close-modal-btn {
       position: absolute;
       top: -40px; right: 0;
@@ -749,9 +877,7 @@
       min-width: 0;
     }
 
-    .input-capsule input::placeholder {
-      color: #64748b;
-    }
+    .input-capsule input::placeholder { color: #64748b; }
 
     .action-icons {
       display: flex;
@@ -804,9 +930,7 @@
       flex-shrink: 0;
     }
 
-    .send-rocket-btn.stop-btn {
-      background: #ef4444 !important;
-    }
+    .send-rocket-btn.stop-btn { background: #ef4444 !important; }
 
     .icon-wrapper {
       position: relative;
@@ -858,7 +982,7 @@
 </head>
 <body>
 
-  <!-- 📌 1. สคริปต์กวาดล้างแคชอัตโนมัติ เพื่อบังคับให้เบราว์เซอร์อ่านโค้ดเวอร์ชันล่าสุดเสมอ -->
+  <!-- 📌 สคริปต์กวาดล้างแคชอัตโนมัติ -->
   <script>
     if ('caches' in window) {
       caches.keys().then((names) => {
@@ -869,7 +993,7 @@
     }
   </script>
 
-<!-- Top Header Bar -->
+  <!-- Top Header Bar -->
   <div class="top-header">
     <div class="header-left">
       <div class="header-logo-svg">
@@ -924,6 +1048,11 @@
 
     <!-- Right Header Actions -->
     <div class="header-right">
+      <!-- 👑 ปุ่ม VIP Host -->
+      <button class="vip-btn" onclick="openVipModal()">
+        <span>👑 VIP Host</span>
+      </button>
+
       <div class="demo-dropdown-wrap" id="demoDropdown">
         <button class="demo-text-btn" onclick="toggleDemoDropdown(event)">
           <span>Demo Version</span>
@@ -937,7 +1066,7 @@
           </div>
           <div class="demo-desc">
             AccuMate ตัวนี้อยู่ในระหว่างการพัฒนาและทดสอบระบบ (Demo) ฟีเจอร์และการตอบสนองอาจมีการปรับปรุงเพิ่มเติม <b>สามารถใช้เป็นแชตชั่วคราวได้เท่านั้น (ไม่รองรับการเก็บประวัติ)</b>
-            <div class="demo-version-tag">v1.0.1</div>
+            <div class="demo-version-tag">v1.0.1-VIP</div>
           </div>
           
           <div class="developer-section">
@@ -955,6 +1084,21 @@
       <button class="icon-btn" onclick="startNewChat()" title="เริ่มแชตใหม่">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       </button>
+    </div>
+  </div>
+
+  <!-- 👑 Modal สำหรับกรอก VIP Host -->
+  <div class="vip-modal-overlay" id="vipModal">
+    <div class="vip-modal-card">
+      <div class="vip-modal-title">👑 VIP Host Authentication</div>
+      <div style="font-size: 12px; color: #64748b;">กรุณากรอกข้อมูลเพื่อเข้าสู่โหมด VIP Host พิเศษ</div>
+      <input type="email" id="vipEmail" class="vip-modal-input" placeholder="อีเมล (vip@accumate.com)">
+      <input type="password" id="vipPassword" class="vip-modal-input" placeholder="รหัสผ่าน (88888888)">
+      <div class="vip-error-msg" id="vipError">อีเมลหรือรหัสผ่านไม่ถูกต้อง!</div>
+      <div class="vip-modal-actions">
+        <button class="vip-cancel-btn" onclick="closeVipModal()">ยกเลิก</button>
+        <button class="vip-submit-btn" onclick="verifyVipLogin()">ยืนยัน</button>
+      </div>
     </div>
   </div>
 
@@ -1026,7 +1170,6 @@
   </div>
 
 <script>
-  // 📌 เปลี่ยน API Key ตรงนี้
   const HARDCODED_API_KEY = "ccsk-e5bdce8828bedce9a3816549962e82ed3db15d7cdfae5925619924e3794d6059"; 
 
   const GREETING_MESSAGES = [
@@ -1039,6 +1182,15 @@
     "เล่าให้ฟังได้นะ อยากให้ช่วยเรื่องไหนเป็นพิเศษ",
     "ให้ Accu ช่วยสรุป หรือช่วยหาข้อมูลเรื่องอะไรดีครับ"
   ];
+
+  // 👑 คำต้อนรับสุดพิเศษสำหรับ VIP Host
+  const VIP_GREETING_MESSAGES = [
+    "ยินดีต้อนรับท่านประธาน VIP สู่ระบบเหนือระดับครับ วันนี้จะให้ Accu รับใช้เรื่องใดดีครับ?",
+    "ระบบ VIP พร้อมปฏิบัติการแล้วครับ ท่านต้องการบัญชาการอะไรวันนี้?",
+    "สวัสดียามท่านประธาน! ทุกฟีเจอร์ระดับท็อปพร้อมให้บริการคุณอย่างเต็มรูปแบบแล้วครับ"
+  ];
+
+  let isVipActive = false;
 
   const SYSTEM_PROMPT = `You are Accu, an AI assistant for AccuMate. 
 CRITICAL RULE: You MUST always respond in the EXACT SAME LANGUAGE that the user uses. 
@@ -1056,6 +1208,33 @@ Formatting guidelines:
   let isGenerating = false;
   let currentAbortController = null;
   let currentSelectedModel = "claude-sonnet-5";
+
+  // 👑 ฟังก์ชันจัดการ VIP Modal
+  function openVipModal() {
+    document.getElementById('vipModal').classList.add('open');
+    document.getElementById('vipEmail').value = '';
+    document.getElementById('vipPassword').value = '';
+    document.getElementById('vipError').style.display = 'none';
+  }
+  function closeVipModal() {
+    document.getElementById('vipModal').classList.remove('open');
+  }
+  function verifyVipLogin() {
+    const email = document.getElementById('vipEmail').value.trim();
+    const pass = document.getElementById('vipPassword').value.trim();
+
+    if (email === "vip@accumate.com" && pass === "88888888") {
+      isVipActive = true;
+      document.body.classList.add('vip-mode');
+      closeVipModal();
+      
+      // เปลี่ยนคำต้อนรับทันทีเมื่อเป็น VIP
+      const titleEl = document.getElementById('welcomeTitle');
+      titleEl.textContent = VIP_GREETING_MESSAGES[Math.floor(Math.random() * VIP_GREETING_MESSAGES.length)];
+    } else {
+      document.getElementById('vipError').style.display = 'block';
+    }
+  }
 
   // ดักจับการคลิกนอกกรอบ (Global Click Listener) เพื่อปิดดรอปดาวน์ทั้งหมด
   document.addEventListener('click', function(event) {
@@ -1149,7 +1328,11 @@ Formatting guidelines:
 
   function setRandomGreeting() {
     const titleEl = document.getElementById('welcomeTitle');
-    titleEl.textContent = GREETING_MESSAGES[Math.floor(Math.random() * GREETING_MESSAGES.length)];
+    if (isVipActive) {
+      titleEl.textContent = VIP_GREETING_MESSAGES[Math.floor(Math.random() * VIP_GREETING_MESSAGES.length)];
+    } else {
+      titleEl.textContent = GREETING_MESSAGES[Math.floor(Math.random() * GREETING_MESSAGES.length)];
+    }
   }
 
   window.addEventListener('DOMContentLoaded', setRandomGreeting);
